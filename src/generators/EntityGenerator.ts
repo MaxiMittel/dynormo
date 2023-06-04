@@ -459,7 +459,59 @@ export class ${this.name} {
 
     async map${this.name}(item) {
         return ${this.printMapper()};
-    }
+    };
+
+    get $transaction() {
+        return {
+            create: async (item) => {
+                const values = ${this.printCreateType()};
+                const params = {
+                    Put: {
+                        TableName: this.tableName,
+                        Item: marshall(values, { removeUndefinedValues: true })
+                    }
+                };
+
+                return { params, item: null };
+            },
+            update: async (${this.printKeyParams()}, item) => {
+                const UpdateExpression = Object.keys(item)
+                    .filter((key) => item[key] !== undefined && key !== "${this.partitionKey}" && key !== "${this.sortKey}")
+                    .map((key) => \`#\${key} = :\${key}\`)
+
+                const ExpressionAttributeValues = Object.keys(item)
+                    .filter((key) => item[key] !== undefined && key !== "${this.partitionKey}" && key !== "${this.sortKey}")
+                    .reduce((acc, key) => ({ ...acc, [\`:\${key}\`]: marshall(item[key], { removeUndefinedValues: true }) }), {});
+
+                const ExpressionAttributeNames = Object.keys(item)
+                    .filter((key) => item[key] !== undefined && key !== "${this.partitionKey}" && key !== "${this.sortKey}")
+                    .reduce((acc, key) => ({ ...acc, [\`#\${key}\`]: key }), {});
+
+                const params = {
+                    Update: {
+                        TableName: this.tableName,
+                        Key: marshall({ ${this.printKeyExpression()} }, { removeUndefinedValues: true }),
+                        UpdateExpression: \`SET \${UpdateExpression}\`,
+                        ExpressionAttributeValues,
+                        ExpressionAttributeNames,
+                        ReturnValues: "ALL_NEW"
+                    }
+                };
+
+                return { params, item: null };
+            },
+            delete: async (${this.printKeyParams()}) => {
+                const params = {
+                    Delete: {
+                        TableName: this.tableName,
+                        Key: marshall({ ${this.printKeyExpression()} }, { removeUndefinedValues: true })
+                    }
+                };
+
+                return { params, item: null };
+            }
+        }
+    };
 }`
     }
 }

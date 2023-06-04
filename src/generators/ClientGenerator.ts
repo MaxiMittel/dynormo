@@ -28,6 +28,23 @@ ${entities.map((e) => `\t${e}CachedEntity;`).join('\n')}
 	}
 
 ${entities.map((e) => this.generateEntityGetter(e, tableMap)).join('\n')}
+
+    $transaction(input) {
+        const chunks = [];
+        for (let i = 0; i < input.length; i += 25) {
+            chunks.push(input.slice(i, i + 25));
+        }
+
+        return Promise.all(
+            chunks.map((chunk) => {
+                const params = {
+                    TransactItems: chunk,
+                };
+
+                return this.client.transactWrite(params);
+            })
+        );
+    }
 }
   `
     }
@@ -84,6 +101,8 @@ export declare class DynormoClient {
 	constructor(config: DynormoClientOptions);
 
 ${entities.map((e) => this.generateEntityGetterDeclaration(e)).join('\n')}
+
+    $transaction(input: (() => { params: string, item: any | null})[]): Promise<void>;
 }
 `
     }
