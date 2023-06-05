@@ -29,7 +29,7 @@ program
         const tableNamesMap: { [key: string]: string } = {}
         for (const file of config.entities) {
             const definition = JSON.parse(fs.readFileSync(file, 'utf-8'))
-            const entity = new EntityGenerator(definition.name, definition.attributes)
+            const entity = new EntityGenerator(definition.name, definition.attributes, definition.relations || [])
 
             const entityDeclerations = new EntityDeclarationGenerator(definition.name, definition.attributes)
 
