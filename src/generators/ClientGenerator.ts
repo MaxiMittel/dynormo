@@ -6,12 +6,12 @@ export class ClientGenerator {
      * @returns {string} The generated code for the DynormoClient class.
      */
     public static generate(entities: string[], tableMap: { [key: string]: string }) {
-        return `import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
-${entities.map((entity) => `import { ${entity}EntityClass } from "./${entity}";`).join('\n')}
+        return `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
+const { DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
+${entities.map((entity) => `const { ${entity}EntityClass } = require("./${entity}");`).join('\n')}
 
 
-export class DynormoClient {
+class DynormoClient {
 	client;
 ${entities.map((e) => `\t${e}CachedEntity;`).join('\n')}
 
@@ -46,6 +46,8 @@ ${entities.map((e) => this.generateEntityGetter(e, tableMap)).join('\n')}
         );
     }
 }
+
+module.exports = { DynormoClient };
   `
     }
 
@@ -58,7 +60,7 @@ ${entities.map((e) => this.generateEntityGetter(e, tableMap)).join('\n')}
     private static generateEntityGetter(entity: string, tableMap: { [key: string]: string }) {
         return `\tget ${entity.toLowerCase()}() {
 		if (!this.${entity}CachedEntity) {
-			return new ${entity}EntityClass(this.client, "${tableMap[entity.toLowerCase()]}");
+			this.${entity}CachedEntity = new ${entity}EntityClass(this.client, "${tableMap[entity.toLowerCase()]}");
 		}
 
 		return this.${entity}CachedEntity;

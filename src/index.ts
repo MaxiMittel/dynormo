@@ -53,7 +53,7 @@ program
 
         const indexFile = path.join(outputDir, 'index.js')
         writeFile(indexFile, `Object.defineProperty(exports, "__esModule", { value: true });
-import { DynormoClient } from "./DynormoClient";
+const { DynormoClient } = require("./DynormoClient");
 exports.DynormoClient = DynormoClient;`)
 
         const indexFileDeclerations = path.join(outputDir, 'index.d.ts')

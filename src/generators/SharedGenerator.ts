@@ -1,6 +1,6 @@
-export const shared_js = `import { randomUUID } from 'crypto';
-import { marshall } from '@aws-sdk/util-dynamodb';
-export function parseFilterExpression(filter) {
+export const shared_js = `const { randomUUID } = require('crypto');
+const { marshall } = require('@aws-sdk/util-dynamodb');
+function parseFilterExpression(filter) {
     let FilterExpression = '';
     let ExpressionAttributeValues = {};
     let ExpressionAttributeNames = {};
@@ -104,7 +104,8 @@ export function parseFilterExpression(filter) {
         ExpressionAttributeNames,
     };
 }
-export function parseKeyConditionExpression(keyCondition) {
+
+function parseKeyConditionExpression(keyCondition) {
     let KeyConditionExpression = '';
     let ExpressionAttributeValues = {};
     let ExpressionAttributeNames = {};
@@ -208,15 +209,20 @@ export function parseKeyConditionExpression(keyCondition) {
         ExpressionAttributeNames,
     };
 }
-export function uuid() {
+ 
+function uuid() {
     return randomUUID();
 }
-export function logQuery(type, entity, func, params) {
+ 
+function logQuery(type, entity, func, params) {
     console.log(\`[\${type}] [\${entity} - \${func}] \${JSON.stringify(params)}\`);
 }
-export function logError(type, entity, func, params, error) {
+ 
+function logError(type, entity, func, params, error) {
     console.error(\`[\${type}] [\${entity} - \${func}] \${JSON.stringify(params)} - \${JSON.stringify(error)}\`);
 }
+
+module.exports = { parseFilterExpression, parseKeyConditionExpression, uuid, logQuery, logError };
 `;
 
 export const shared_d_ts = `export type FilterExpression<T> = {

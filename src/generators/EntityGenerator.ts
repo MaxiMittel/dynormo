@@ -244,7 +244,7 @@ export class EntityGenerator {
      * @returns {string} The generated code
      */
     public generate(): string {
-        return `import {
+        return `const {
   GetItemCommand, 
   PutItemCommand, 
   DeleteItemCommand, 
@@ -252,21 +252,21 @@ export class EntityGenerator {
   BatchWriteItemCommand,
   QueryCommand,
   UpdateItemCommand,
-} from "@aws-sdk/client-dynamodb";
-import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
-import {
+} = require("@aws-sdk/client-dynamodb");
+const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
+const {
   parseFilterExpression,
   parseKeyConditionExpression,
   uuid,
   logQuery,
   logError
-} from "./shared";
+} = require("./shared");
 
-export class ${this.name} {
+class ${this.name}EntityClass {
     client;
     tableName;
   
-    constructor(client, tableName, dynormo) {
+    constructor(client, tableName) {
         this.client = client;
         this.tableName = tableName;
     }
@@ -548,6 +548,8 @@ export class ${this.name} {
             }
         }
     };
-}`
+}
+
+module.exports = { ${this.name}EntityClass };`;
     }
 }
