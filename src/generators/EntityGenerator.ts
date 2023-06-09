@@ -368,8 +368,18 @@ class ${this.name}EntityClass {
     };
 
     async findFirst(query) {
-        const { items } = await this.findMany({...query, limit: 1});
-        return items[0] || null;
+        let limit = 25;
+        let items = [];
+        let lastKey = null;
+        
+        do {
+            const response = await this.findMany({ ...query, limit, startKey: lastKey });
+            items = response.items;
+            lastKey = response.lastKey;
+            limit = Math.max(limit * 2, query.limit);
+        } while (items.length === 0 && lastKey);
+
+        return items[0]? this.map${this.name}(items[0]) : null;
     };
 
     async delete(${this.printKeyParams()}) {

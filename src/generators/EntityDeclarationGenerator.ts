@@ -147,7 +147,7 @@ export type ${this.name}FindManyOutput = {
 export type ${this.name}FindFirstInput = {
   where?: ${this.name}FilterExpression;
   key?: ${this.name}KeyCondition;
-  startKey?: any;
+  limit?: number;
 }
 
 export type ${this.name}DeleteManyInput = {

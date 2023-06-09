@@ -2,7 +2,7 @@ import { DynormoClient } from '.dynormo'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { expect, test, describe } from '@jest/globals'
 
-describe('findOne', () => {
+describe('findMany', () => {
     test('pK - static sK - scan', async () => {
         const client = new DynormoClient({
             client: new DynamoDBClient({
