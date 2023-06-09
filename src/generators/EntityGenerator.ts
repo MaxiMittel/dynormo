@@ -256,7 +256,6 @@ export class EntityGenerator {
 const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 const {
   parseFilterExpression,
-  parseKeyConditionExpression,
   uuid,
   logQuery,
   logError
@@ -325,7 +324,7 @@ class ${this.name}EntityClass {
                 return {
                     items: response.Items.map((item) => this.map${this.name}(unmarshall(item))),
                     lastKey: response.LastEvaluatedKey ? unmarshall(response.LastEvaluatedKey) : null,
-                    count: Items.length,
+                    count: response.Items.length,
                 };
             } catch (err) {
                 logError("SCAN", "${this.name}", "findMany", params, err);
@@ -333,10 +332,10 @@ class ${this.name}EntityClass {
             }
         } else {
             const {
-                KeyConditionExpression,
+                FilterExpression: KeyConditionExpression,
                 ExpressionAttributeValues: KeyExpressionAttributeValues,
                 ExpressionAttributeNames: KeyExpressionAttributeNames
-            } = parseKeyConditionExpression(condition);
+            } = parseFilterExpression(query.key);
 
             const params = {
                 TableName: this.tableName,
@@ -350,16 +349,16 @@ class ${this.name}EntityClass {
 
             try {
                 logQuery("QUERY", "${this.name}", "findMany", params);
-                const { Items } = await this.client.send(new QueryCommand(params));
+                const response = await this.client.send(new QueryCommand(params));
 
-                if (!Items) {
+                if (!response.Items) {
                     return { items: [], lastKey: null, count: 0 };
                 }
 
                 return {
-                    items: Items.map((item) => this.map${this.name}(unmarshall(item))),
+                    items: response.Items.map((item) => this.map${this.name}(unmarshall(item))),
                     lastKey: response.LastEvaluatedKey ? unmarshall(response.LastEvaluatedKey) : null,
-                    count: Items.length,
+                    count: response.Items.length,
                 };
             } catch (err) {
                 logError("QUERY", "${this.name}", "findMany", params, err);
@@ -493,7 +492,7 @@ class ${this.name}EntityClass {
         }
     };
 
-    async map${this.name}(item) {
+    map${this.name}(item) {
         return ${this.printMapper()};
     };
 

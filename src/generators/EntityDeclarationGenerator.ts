@@ -162,7 +162,7 @@ export declare class ${this.name}EntityClass {
   constructor(client: DynamoDBClient, tableName: string);
 
   findOne(${this.printKeyParams()}): Promise<${this.name}Entity | null>;
-  findMany(query: ${this.name}FindManyInput): Promise<${this.name}Entity[]>;
+  findMany(query: ${this.name}FindManyInput): Promise<${this.name}FindManyOutput>;
   findFirst(query: ${this.name}FindFirstInput): Promise<${this.name}Entity | null>;
   delete(${this.printKeyParams()}): Promise<void>;
   deleteMany(query: ${this.name}FindManyInput): Promise<void>;
