@@ -5,34 +5,29 @@
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
-
-
 
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
+  <a href="https://github.com/MaxiMittel/dynormo">
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
-  <h3 align="center">Best-README-Template</h3>
+  <h3 align="center">Dynormo</h3>
 
   <p align="center">
-    An awesome README template to jumpstart your projects!
+    Typesafe ORM for AWS DynamoDB
     <br />
-    <a href="https://github.com/othneildrew/Best-README-Template"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/MaxiMittel/dynormo/wiki"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/othneildrew/Best-README-Template">View Demo</a>
+    <a href="https://github.com/MaxiMittel/dynormo/wiki/Getting-started">Get Started</a>
     ·
-    <a href="https://github.com/othneildrew/Best-README-Template/issues">Report Bug</a>
+    <a href="https://github.com/MaxiMittel/dynormo/issues">Report Bug</a>
     ·
-    <a href="https://github.com/othneildrew/Best-README-Template/issues">Request Feature</a>
+    <a href="https://github.com/MaxiMittel/dynormo/issues">Request Feature</a>
   </p>
 </div>
-
-
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -40,130 +35,126 @@
   <ol>
     <li>
       <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
     </li>
     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
         <li><a href="#installation">Installation</a></li>
+        <li><a href="#configuration">Configuration</a></li>
+        <li><a href="#usage">Usage</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
 </details>
 
-
-
 <!-- ABOUT THE PROJECT -->
+
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+Dynormo is an open-source GitHub project that offers developers a robust object-relational mapping (ORM) library designed specifically for DynamoDB, the popular NoSQL database service provided by Amazon Web Services (AWS). With Dynormo, you can effortlessly interact with DynamoDB using a typesafe and intuitive approach, enabling you to work with your data in a strongly-typed manner.
 
-There are many great README templates available on GitHub; however, I didn't find one that really suited my needs so I created this enhanced one. I want to create a README template so amazing that it'll be the last one you ever need -- I think this is it.
+One of the key features of Dynormo is its type safety. By leveraging the type system of the programming language you're using, Dynormo ensures that your code is free from runtime type errors when interacting with DynamoDB. This prevents common pitfalls such as mismatched data types, missing attributes, or incorrect queries, providing you with a more reliable and predictable development experience.
 
-Here's why:
-* Your time should be focused on creating something amazing. A project that solves a problem and helps others
-* You shouldn't be doing the same tasks over and over like creating a README from scratch
-* You should implement DRY principles to the rest of your life :smile:
-
-Of course, no one template will serve all projects since your needs may be different. So I'll be adding more in the near future. You may also suggest changes by forking this repo and creating a pull request or opening an issue. Thanks to all the people have contributed to expanding this template!
-
-Use the `BLANK_README.md` to get started.
+Dynormo also offers an intuitive API that closely aligns with the DynamoDB data model. It provides a set of high-level abstractions for common database operations such as querying, inserting, updating, and deleting data. These abstractions make it easier to express your intent in code and reduce the boilerplate typically associated with low-level DynamoDB interactions.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-### Built With
-
-This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
-
-* [![Next][Next.js]][Next-url]
-* [![React][React.js]][React-url]
-* [![Vue][Vue.js]][Vue-url]
-* [![Angular][Angular.io]][Angular-url]
-* [![Svelte][Svelte.dev]][Svelte-url]
-* [![Laravel][Laravel.com]][Laravel-url]
-* [![Bootstrap][Bootstrap.com]][Bootstrap-url]
-* [![JQuery][JQuery.com]][JQuery-url]
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
 
 <!-- GETTING STARTED -->
+
 ## Getting Started
-
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
-
-### Prerequisites
-
-This is an example of how to list things you need to use the software and how to install them.
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
 
 ### Installation
 
-_Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
+To start using Dynormo in your project, you need to install it via npm. Open your terminal and run the following command:
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
-   ```sh
-   git clone https://github.com/your_username_/Project-Name.git
-   ```
-3. Install NPM packages
-   ```sh
-   npm install
-   ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
-   ```
+```bash
+npm install dynormo --save-dev
+```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+### Configuration
 
+Before you can start using Dynormo, you need to configure a few things.
 
+#### Config file
 
-<!-- USAGE EXAMPLES -->
-## Usage
+Create a configuration file called `dynormo.config.json` at the root of your project. This file will contain some configurations need for you `DynormoClient`. You can read more about the configuration file in the [Configuration](Configuration.md) section.
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+```json
+{
+    "entities": ["entities/User.json"]
+}
+```
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+#### Entity definition
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+Create a file called `User.json` in a folder called `entities` at the root of your project. This file will contain the definition of your `User` entity. You can read more about entity definitions in the [Entities](Entities.md) section.
+Link this entity and all other entities to the `entities` array in the `dynormo.config.json` file.
 
+```json
+{
+    "name": "User",
+    "table": "dynormo-users",
+    "attributes": {
+        "partitionKey": {
+            "type": "string",
+            "partitionKey": true,
+            "generator": "UUID"
+        },
+        "stringAttr1": {
+            "type": "string"
+        }
+    }
+}
+```
 
+#### Generate type definitions
 
-<!-- ROADMAP -->
-## Roadmap
+The last thing you need to do is generate the type definitions for your entities. This is done by running the following command in your terminal:
 
-- [x] Add Changelog
-- [x] Add back to top links
-- [ ] Add Additional Templates w/ Examples
-- [ ] Add "components" document to easily copy & paste sections of the readme
-- [ ] Multi-language Support
-    - [ ] Chinese
-    - [ ] Spanish
+```bash
+npx dynormo generate
+```
 
-See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
+This will generate all the type definitions and code needed to interact with your DynamoDB tables inside your `node_modules` folder. You can read more about the `generate` command in the [CLI](Cli.md) section.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+#### DynormoClient
 
+The last thing you need to do is create a `DynormoClient` instance. This is the main entry point for interacting with Dynormo.
+It is recommended to create a single `DynormoClient` instance and reuse it throughout your application. You can read more about the `DynormoClient` in the [DynormoClient](DynormoClient.md) section.
 
+```typescript
+import { DynormoClient } from '.dynormo'
+
+const client = new DynormoClient({
+    client: new DynamoDBClient({
+        region: 'eu-central-1',
+    }),
+})
+```
+
+### Usage
+
+Now that you have everything set up, you can start using Dynormo to interact with your DynamoDB tables. Let's create a new user in the `dynormo-users` table.
+
+```typescript
+import { DynormoClient } from '.dynormo'
+
+const client = new DynormoClient({
+    client: new DynamoDBClient({
+        region: 'eu-central-1',
+    }),
+})
+
+const user = await client.user.create({
+    stringAttr1: 'Hello World!',
+})
+```
 
 <!-- CONTRIBUTING -->
+
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
@@ -179,58 +170,35 @@ Don't forget to give the project a star! Thanks again!
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-
 <!-- LICENSE -->
+
 ## License
 
 Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-
 <!-- CONTACT -->
+
 ## Contact
 
-Your Name - [@your_twitter](https://twitter.com/your_username) - email@example.com
-
-Project Link: [https://github.com/your_username/repo_name](https://github.com/your_username/repo_name)
+Maximilian Mittelhammer - [LinkedIn](https://www.linkedin.com/in/maximilian-mittelhammer-6a0278130/) - maximittel@outlook.de
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- ACKNOWLEDGMENTS -->
-## Acknowledgments
-
-Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
-
-* [Choose an Open Source License](https://choosealicense.com)
-* [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
-* [Malven's Flexbox Cheatsheet](https://flexbox.malven.co/)
-* [Malven's Grid Cheatsheet](https://grid.malven.co/)
-* [Img Shields](https://shields.io)
-* [GitHub Pages](https://pages.github.com)
-* [Font Awesome](https://fontawesome.com)
-* [React Icons](https://react-icons.github.io/react-icons/search)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=for-the-badge
-[contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=for-the-badge
-[forks-url]: https://github.com/othneildrew/Best-README-Template/network/members
-[stars-shield]: https://img.shields.io/github/stars/othneildrew/Best-README-Template.svg?style=for-the-badge
-[stars-url]: https://github.com/othneildrew/Best-README-Template/stargazers
-[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
-[issues-url]: https://github.com/othneildrew/Best-README-Template/issues
-[license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=for-the-badge
-[license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
+
+[contributors-shield]: https://img.shields.io/github/contributors/MaxiMittel/dynormo.svg?style=for-the-badge
+[contributors-url]: https://github.com/MaxiMittel/dynormo/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/MaxiMittel/dynormo.svg?style=for-the-badge
+[forks-url]: https://github.com/MaxiMittel/dynormo/network/members
+[stars-shield]: https://img.shields.io/github/stars/MaxiMittel/dynormo.svg?style=for-the-badge
+[stars-url]: https://github.com/MaxiMittel/dynormo/stargazers
+[issues-shield]: https://img.shields.io/github/issues/MaxiMittel/dynormo.svg?style=for-the-badge
+[issues-url]: https://github.com/MaxiMittel/dynormo/issues
+[license-shield]: https://img.shields.io/github/license/MaxiMittel/dynormo.svg?style=for-the-badge
+[license-url]: https://github.com/MaxiMittel/dynormo/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/othneildrew
 [product-screenshot]: images/screenshot.png
@@ -249,4 +217,4 @@ Use this space to list resources you find helpful and would like to give credit 
 [Bootstrap.com]: https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
 [Bootstrap-url]: https://getbootstrap.com
 [JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
-[JQuery-url]: https://jquery.com 
+[JQuery-url]: https://jquery.com
