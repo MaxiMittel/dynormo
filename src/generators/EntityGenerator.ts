@@ -382,6 +382,19 @@ class ${this.name}EntityClass {
         return items[0]? this.map${this.name}(items[0]) : null;
     };
 
+    async findAll(query) {
+        let items = [];
+        let lastKey = null;
+
+        do {
+            const response = await this.findMany({ ...query, startKey: lastKey });
+            items = items.concat(response.items);
+            lastKey = response.lastKey;
+        } while (lastKey);
+
+        return items.map((item) => this.map${this.name}(item));
+    };
+
     async delete(${this.printKeyParams()}) {
         const params = {
             TableName: this.tableName,
@@ -410,8 +423,7 @@ class ${this.name}EntityClass {
     };
 
     async deleteMany(query) {
-        // TODO: Replace with findAll
-        const items = await this.findMany(query);
+        const items = await this.findAll(query);
 
         const chunks = [];
         const chunkSize = 25;
@@ -422,7 +434,7 @@ class ${this.name}EntityClass {
         try {
             const promises = [];
             for (const chunk of chunks) {
-                promises.push(async () => {
+                const promise = (async () => {
                     const params = {
                         RequestItems: {
                             [this.tableName]: chunk.map((item) => ({
@@ -438,7 +450,9 @@ class ${this.name}EntityClass {
 
                     logQuery("BATCH_WRITE", "${this.name}", "deleteMany", params);
                     await this.client.send(new BatchWriteItemCommand(params));
-                });
+                })();
+
+                promises.push(promise);
             }
             
             await Promise.all(promises);

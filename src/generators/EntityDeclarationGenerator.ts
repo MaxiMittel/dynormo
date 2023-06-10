@@ -150,6 +150,12 @@ export type ${this.name}FindFirstInput = {
   limit?: number;
 }
 
+export type ${this.name}FindAllInput = {
+  where?: ${this.name}FilterExpression;
+  key?: ${this.name}KeyCondition;
+  limit?: number;
+}
+
 export type ${this.name}DeleteManyInput = {
   where?: ${this.name}FilterExpression;
   key?: ${this.name}KeyCondition;
@@ -164,6 +170,7 @@ export declare class ${this.name}EntityClass {
   findOne(${this.printKeyParams()}): Promise<${this.name}Entity | null>;
   findMany(query: ${this.name}FindManyInput): Promise<${this.name}FindManyOutput>;
   findFirst(query: ${this.name}FindFirstInput): Promise<${this.name}Entity | null>;
+  findAll(query: ${this.name}FindAllInput): Promise<${this.name}Entity[]>;
   delete(${this.printKeyParams()}): Promise<void>;
   deleteMany(query: ${this.name}FindManyInput): Promise<void>;
   create(item: Create${this.name}Input): Promise<${this.name}Entity>;
