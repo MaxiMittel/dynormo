@@ -48,7 +48,7 @@ export const printObject = (attr: { [key: string]: IAttribute }, mode: PrintMode
                 keyItem += `${key}${attribute.nullable ? '?' : ''}: ${printType(attribute, indent)};\n`
                 break
             case PrintMode.DEFAULT:
-                keyItem += `${key}${attribute.nullable || attribute.defaultValue ? '?' : ''}: ${printType(attribute, indent)};\n`
+                keyItem += `${key}${attribute.nullable || attribute.defaultValue || attribute.generator ? '?' : ''}: ${printType(attribute, indent)};\n`
                 break
             case PrintMode.PARTIAL:
                 keyItem += `${key}?: ${printType(attribute, indent)};\n`
