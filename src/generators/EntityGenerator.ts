@@ -481,13 +481,21 @@ class ${this.name}EntityClass {
     };
 
     async update(${this.printKeyParams()}, item) {
+        const processValue = (value) => {
+            if (value instanceof Date) {
+                return value.toISOString();
+            } else {
+                return value;
+            }
+        };
+
         const UpdateExpression = Object.keys(item)
             .filter((key) => item[key] !== undefined && key !== "${this.partitionKey}" && key !== "${this.sortKey}")
             .map((key) => \`#\${key} = :\${key}\`)
             .join(", ");
         const ExpressionAttributeValues = Object.keys(item)
             .filter((key) => item[key] !== undefined && key !== "${this.partitionKey}" && key !== "${this.sortKey}")
-            .reduce((acc, key) => ({ ...acc, [\`:\${key}\`]: marshall(item[key], { removeUndefinedValues: true }) }), {});
+            .reduce((acc, key) => ({ ...acc, [\`:\${key}\`]: marshall(processValue(item[key]), { removeUndefinedValues: true }) }), {});
         const ExpressionAttributeNames = Object.keys(item)
             .filter((key) => item[key] !== undefined && key !== "${this.partitionKey}" && key !== "${this.sortKey}")
             .reduce((acc, key) => ({ ...acc, [\`#\${key}\`]: key }), {});
