@@ -10,7 +10,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/MaxiMittel/dynormo">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="images/logo.svg" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">Dynormo</h3>
