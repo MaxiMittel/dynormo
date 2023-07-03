@@ -134,6 +134,7 @@ ${this.printKeyConditionType()}
 export type ${this.name}FindManyInput = {
   where?: ${this.name}FilterExpression;
   key?: ${this.name}KeyCondition;
+  index?: string;
   limit?: number;
   startKey?: any;
 }

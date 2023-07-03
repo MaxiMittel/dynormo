@@ -310,6 +310,7 @@ class ${this.name}EntityClass {
                 ExpressionAttributeValues,
                 ExpressionAttributeNames,
                 Limit: query.limit ? query.limit : undefined,
+                IndexName: query.index ? query.index : undefined,
                 ExclusiveStartKey: query.startKey ? marshall(query.startKey) : undefined,
             };
 
@@ -344,6 +345,7 @@ class ${this.name}EntityClass {
                 ExpressionAttributeValues: { ...ExpressionAttributeValues, ...KeyExpressionAttributeValues },
                 ExpressionAttributeNames: { ...ExpressionAttributeNames, ...KeyExpressionAttributeNames },
                 Limit: query.limit ? query.limit : undefined,
+                IndexName: query.index ? query.index : undefined,
                 ExclusiveStartKey: query.startKey ? marshall(query.startKey) : undefined,
             };
 
