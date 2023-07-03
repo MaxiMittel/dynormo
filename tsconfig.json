@@ -16,7 +16,8 @@
     "noImplicitThis": false,
     "strictNullChecks": false,
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "declaration": true
   },
   "include": ["./src/**/*", "src/test/**/*"],
   "exclude": ["./node_modules", "./dist"]
