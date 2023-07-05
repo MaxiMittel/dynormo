@@ -1,0 +1,21 @@
+{
+    "name": "FindOne2",
+    "table": "dynormo-test-single-key",
+    "attributes": {
+        "partitionKey": {
+            "type": "string",
+            "partitionKey": true,
+            "generator": "UUID"
+        },
+        "stringAttr1": {
+            "type": "string"
+        },
+        "stringAttr2": {
+            "type": "string"
+        },
+        "dateAttr": {
+            "type": "date",
+            "generator": "NOW"
+        }
+    }
+}

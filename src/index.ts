@@ -31,7 +31,13 @@ program
             const definition = JSON.parse(fs.readFileSync(file, 'utf-8'))
             const entity = new EntityGenerator(definition.name, definition.attributes, definition.relations || [])
 
-            const entityDeclerations = new EntityDeclarationGenerator(definition.name, definition.attributes)
+            const entityDeclerations = new EntityDeclarationGenerator({
+                name: definition.name,
+                attributes: definition.attributes,
+                entities: {
+                    generate: config?.options?.generate ?? 'types',
+                },
+            })
 
             const filePath = path.join(outputDir, definition.name + '.js')
             const filePathDeclerations = path.join(outputDir, definition.name + '.d.ts')
@@ -52,13 +58,19 @@ program
         writeFile(path.join(outputDir, 'DynormoClient.d.ts'), ClientGenerator.generateDeclarations(entityNames))
 
         const indexFile = path.join(outputDir, 'index.js')
-        writeFile(indexFile, `Object.defineProperty(exports, "__esModule", { value: true });
+        writeFile(
+            indexFile,
+            `Object.defineProperty(exports, "__esModule", { value: true });
 const { DynormoClient } = require("./DynormoClient");
-exports.DynormoClient = DynormoClient;`)
+exports.DynormoClient = DynormoClient;`
+        )
 
         const indexFileDeclerations = path.join(outputDir, 'index.d.ts')
-        writeFile(indexFileDeclerations, `${entityNames.map((name) => `export * from "./${name}";`).join('\n')}
-export { DynormoClient } from "./DynormoClient";`)
+        writeFile(
+            indexFileDeclerations,
+            `${entityNames.map((name) => `export * from "./${name}";`).join('\n')}
+export { DynormoClient } from "./DynormoClient";`
+        )
 
         const packageJson = path.join(outputDir, 'package.json')
         writeFile(packageJson, JSON.stringify({ name: '.dynormo', main: './index.js', types: './index.d.ts' }, null, 2))

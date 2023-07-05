@@ -1,7 +1,6 @@
 node_modules
 dist
 output
-entities
 
 # OS generated files
 .DS_Store

@@ -4,9 +4,18 @@ import { printObject, printType } from '../shared/printType'
 import { AttributeMap } from '../types/AttributeMap'
 import { DatabaseType } from '../types/DatabaseType'
 
+export type EntityDeclarationGeneratorOptions = {
+    name: string
+    attributes: AttributeMap
+    entities: {
+        generate: 'types' | 'classes'
+    }
+}
+
 export class EntityDeclarationGenerator {
     name: string
     attributes: AttributeMap
+    mode: 'types' | 'classes' = 'types'
     partitionKey: string
     partitionKeyType: string
     partitionKeyStaticValue?: DatabaseType
@@ -14,12 +23,13 @@ export class EntityDeclarationGenerator {
     sortKeyType?: string
     sortKeyStaticValue?: DatabaseType
 
-    constructor(name: string, attributes: AttributeMap) {
-        this.name = name
-        this.attributes = attributes
+    constructor(options: EntityDeclarationGeneratorOptions) {
+        this.name = options.name
+        this.attributes = options.attributes
+        this.mode = options.entities?.generate ?? 'types'
 
-        for (const key in attributes) {
-            const attribute = attributes[key]
+        for (const key in this.attributes) {
+            const attribute = this.attributes[key]
             if (attribute.partitionKey) {
                 this.partitionKey = key
                 this.partitionKeyType = printType(attribute, PrintMode.DEFAULT, 0)
@@ -54,6 +64,22 @@ export class EntityDeclarationGenerator {
             params.push(`${this.sortKey}: ${this.sortKeyType}`)
         }
         return params.join(', ')
+    }
+
+    /**
+     * Returns the keyword for the specified entity generation mode
+     * @returns {string} The keyword
+     */
+    private get keyword(): string {
+        return this.mode === 'types' ? 'type' : 'class'
+    }
+
+    /**
+     * For mode types returns the equals sign, otherwise an empty string
+     * @returns {string} The equals sign
+     */
+    private get equals(): string {
+        return this.mode === 'types' ? '= ' : ''
     }
 
     /**
@@ -118,20 +144,20 @@ export class EntityDeclarationGenerator {
         return `import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { FilterExpression } from "./shared";
 
-export type ${this.name}Entity = {
+export ${this.keyword} ${this.name}Entity ${this.equals}{
 ${printObject(this.attributes, PrintMode.FULL, 1)}}
 
-export type Create${this.name}Input = {
+export ${this.keyword} Create${this.name}Input ${this.equals}{
 ${printObject(this.attributes, PrintMode.DEFAULT, 1)}}
 
-export type Update${this.name}Input = {
+export ${this.keyword} Update${this.name}Input ${this.equals}{
 ${printObject(this.attributes, PrintMode.PARTIAL, 1)}}
 
 ${this.printFilterExpressionType()}
 
 ${this.printKeyConditionType()}
 
-export type ${this.name}FindManyInput = {
+export ${this.keyword} ${this.name}FindManyInput ${this.equals}{
   where?: ${this.name}FilterExpression;
   key?: ${this.name}KeyCondition;
   index?: string;
@@ -139,25 +165,25 @@ export type ${this.name}FindManyInput = {
   startKey?: any;
 }
 
-export type ${this.name}FindManyOutput = {
+export ${this.keyword} ${this.name}FindManyOutput ${this.equals}{
   items: ${this.name}Entity[];
   lastKey?: any;
   count: number;
 }
 
-export type ${this.name}FindFirstInput = {
+export ${this.keyword} ${this.name}FindFirstInput ${this.equals}{
   where?: ${this.name}FilterExpression;
   key?: ${this.name}KeyCondition;
   limit?: number;
 }
 
-export type ${this.name}FindAllInput = {
+export ${this.keyword} ${this.name}FindAllInput ${this.equals}{
   where?: ${this.name}FilterExpression;
   key?: ${this.name}KeyCondition;
   limit?: number;
 }
 
-export type ${this.name}DeleteManyInput = {
+export ${this.keyword} ${this.name}DeleteManyInput ${this.equals}{
   where?: ${this.name}FilterExpression;
   key?: ${this.name}KeyCondition;
 }

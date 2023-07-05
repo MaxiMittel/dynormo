@@ -1,0 +1,25 @@
+{
+    "name": "FindOne3",
+    "table": "dynormo-test",
+    "attributes": {
+        "partitionKey": {
+            "type": "string",
+            "partitionKey": true,
+            "generator": "UUID"
+        },
+        "sortKey": {
+            "type": "string",
+            "sortKey": true
+        },
+        "stringAttr1": {
+            "type": "string"
+        },
+        "stringAttr2": {
+            "type": "string"
+        },
+        "dateAttr": {
+            "type": "date",
+            "generator": "NOW"
+        }
+    }
+}
