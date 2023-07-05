@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { DynormoClient } from '.dynormo'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { expect, test, describe } from '@jest/globals'
