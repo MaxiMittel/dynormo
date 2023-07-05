@@ -1,0 +1,6 @@
+{
+    "entities": ["src/test/entities/findOne_1.json", "src/test/entities/findOne_2.json", "src/test/entities/findOne_3.json"],
+    "options": {
+        "generate": "classes"
+    }
+}
