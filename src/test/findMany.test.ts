@@ -14,6 +14,7 @@ describe('findMany', () => {
         const item = await client.findone1.findMany({
             where: {
                 stringAttr1: 'test_value_1',
+                stringAttr2: undefined
             },
         })
 
