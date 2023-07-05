@@ -101,7 +101,7 @@ describe('findMany', () => {
             key: {
                 partitionKey: 'findMany#test#10',
                 sortKey: {
-                    beginsWidth: 'findMany#test#10',
+                    beginsWith: 'findMany#test#10',
                 },
             },
         })

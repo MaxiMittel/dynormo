@@ -94,7 +94,7 @@ module.exports = { parseFilterExpression, uuid, logQuery, logError };
 `
 
 export const shared_d_ts = `export type FilterExpression<T> = {
-    beginsWidth?: T;
+    beginsWith?: T;
     eq?: T;
     g?: T;
     ge?: T;
