@@ -13,6 +13,7 @@ ${entities.map((entity) => `const { ${entity}EntityClass } = require("./${entity
 
 class DynormoClient {
 	client;
+    tables;
 ${entities.map((e) => `\t${e}CachedEntity;`).join('\n')}
 
 	constructor(config) {
@@ -25,6 +26,7 @@ ${entities.map((e) => `\t${e}CachedEntity;`).join('\n')}
 				credentials: config.credentials,
 			})
 		);
+        this.tables = config.tables || {};
 	}
 
 ${entities.map((e) => this.generateEntityGetter(e, tableMap)).join('\n')}
@@ -60,7 +62,7 @@ module.exports = { DynormoClient };
     private static generateEntityGetter(entity: string, tableMap: { [key: string]: string }) {
         return `\tget ${entity.toLowerCase()}() {
 		if (!this.${entity}CachedEntity) {
-			this.${entity}CachedEntity = new ${entity}EntityClass(this.client, "${tableMap[entity.toLowerCase()]}");
+			this.${entity}CachedEntity = new ${entity}EntityClass(this.client, this.tables["${entity}"] ?? "${tableMap[entity.toLowerCase()] ?? ""}");
 		}
 
 		return this.${entity}CachedEntity;
@@ -95,6 +97,9 @@ export type DynormoClientOptions = {
 		sessionToken?: string;
 	};
 	client?: DynamoDBClient;
+    tables?: {
+${entities.map((e) => `\t\t${e}?: string;`).join('\n')}
+    };
 };
 
 export declare class DynormoClient {
