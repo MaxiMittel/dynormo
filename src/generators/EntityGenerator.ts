@@ -307,8 +307,8 @@ class ${this.name}EntityClass {
             const params = {
                 TableName: this.tableName,
                 FilterExpression: FilterExpression ? FilterExpression : undefined,
-                ExpressionAttributeValues,
-                ExpressionAttributeNames,
+                ExpressionAttributeValues: Object.keys(ExpressionAttributeValues ?? {}).length ? ExpressionAttributeValues : undefined,
+                ExpressionAttributeNames: Object.keys(ExpressionAttributeNames ?? {}).length ? ExpressionAttributeNames : undefined,
                 Limit: query.limit ? query.limit : undefined,
                 IndexName: query.index ? query.index : undefined,
                 ExclusiveStartKey: query.startKey ? marshall(query.startKey) : undefined,
@@ -338,12 +338,15 @@ class ${this.name}EntityClass {
                 ExpressionAttributeNames: KeyExpressionAttributeNames
             } = parseFilterExpression(query.key);
 
+            const combinedExpressionAttributeValues = { ...ExpressionAttributeValues, ...KeyExpressionAttributeValues };
+            const combinedExpressionAttributeNames = { ...ExpressionAttributeNames, ...KeyExpressionAttributeNames };
+
             const params = {
                 TableName: this.tableName,
                 KeyConditionExpression,
                 FilterExpression: FilterExpression ? FilterExpression : undefined,
-                ExpressionAttributeValues: { ...ExpressionAttributeValues, ...KeyExpressionAttributeValues },
-                ExpressionAttributeNames: { ...ExpressionAttributeNames, ...KeyExpressionAttributeNames },
+                ExpressionAttributeValues: Object.keys(combinedExpressionAttributeValues ?? {}).length ? combinedExpressionAttributeValues : undefined,
+                ExpressionAttributeNames: Object.keys(combinedExpressionAttributeNames ?? {}).length ? combinedExpressionAttributeNames : undefined,
                 Limit: query.limit ? query.limit : undefined,
                 IndexName: query.index ? query.index : undefined,
                 ExclusiveStartKey: query.startKey ? marshall(query.startKey) : undefined,

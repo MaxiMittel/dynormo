@@ -72,7 +72,7 @@ function parseFilterExpression(filter) {
         })
 
         return {
-            FilterExpression: '(' + FilterExpressionItems.join(\` \${type} \`) + ')',
+            FilterExpression: FilterExpressionItems.length? '(' + FilterExpressionItems.join(\` \${type} \`) + ')' : '',
             ExpressionAttributeValues,
             ExpressionAttributeNames,
         }

@@ -122,11 +122,11 @@ export class EntityDeclarationGenerator {
      */
     private printKeyConditionType(): string {
         const params = []
-        if (this.partitionKey && !this.partitionKeyStaticValue) {
+        if (this.partitionKey) {
             params.push(`  ${this.partitionKey}?: FilterExpression<${this.partitionKeyType}> | ${this.partitionKeyType};`)
         }
 
-        if (this.sortKey && !this.sortKeyStaticValue) {
+        if (this.sortKey) {
             params.push(`  ${this.sortKey}?: FilterExpression<${this.sortKeyType}> | ${this.sortKeyType};`)
         }
 
