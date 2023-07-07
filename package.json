@@ -1,6 +1,6 @@
 {
     "name": "dynormo",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "description": "Dynormo is a powerful object-relational mapping (ORM) library designed specifically for DynamoDB, Amazon Web Service's managed NoSQL database.",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
