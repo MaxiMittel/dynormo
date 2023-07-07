@@ -1,0 +1,19 @@
+{
+    "name": "ArrayTest",
+    "table": "dynormo-test",
+    "attributes": {
+        "partitionKey": {
+            "type": "string",
+            "partitionKey": true,
+            "generator": "UUID"
+        },
+        "sortKey": {
+            "type": "string",
+            "sortKey": true,
+            "staticValue": "static_key"
+        },
+        "setAttr1": {
+            "type": "set<string>"
+        }
+    }
+}

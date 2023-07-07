@@ -198,14 +198,32 @@ export class EntityGenerator {
                     typeString += `${'\t'.repeat(indent)}${key}: {\n${item(attribute.properties, indent + 1, [...path, key])}${' '.repeat(indent * 2)}},`
                 } else {
                     typeString += `${'\t'.repeat(indent)}${key}: `
-                    if (attribute.type === AttributeType.DATE) {
-                        typeString += `new Date(item${printPath([...path, key])}),\n`
-                        continue
-                    }
 
-                    if (attribute.type === AttributeType.DATE_LIST) {
-                        typeString += `item${printPath([...path, key])}.map((date) => new Date(date)),\n`
-                        continue
+                    switch (attribute.type) {
+                        case AttributeType.DATE:
+                            typeString += `new Date(item${printPath([...path, key])}),\n`
+                            continue
+                        case AttributeType.DATE_LIST:
+                            typeString += `item${printPath([...path, key])}.map((date) => new Date(date)),\n`
+                            continue
+                        case AttributeType.BOOLEAN_LIST:
+                            typeString += `item${printPath([...path, key])} ?? [],\n`
+                            continue
+                        case AttributeType.NUMBER_LIST:
+                            typeString += `item${printPath([...path, key])} ?? [],\n`
+                            continue
+                        case AttributeType.STRING_LIST:
+                            typeString += `item${printPath([...path, key])} ?? [],\n`
+                            continue
+                        case AttributeType.MAP_LIST:
+                            typeString += `item${printPath([...path, key])} ?? [],\n`
+                            continue
+                        case AttributeType.NUMBER_SET:
+                            typeString += `item${printPath([...path, key])} ?? new Set(),\n`
+                            continue
+                        case AttributeType.STRING_SET:
+                            typeString += `item${printPath([...path, key])} ?? new Set(),\n`
+                            continue
                     }
 
                     typeString += `item${printPath([...path, key])},\n`
@@ -220,15 +238,15 @@ export class EntityGenerator {
     }
 
     private get deleteRelations(): IDeleteRelation[] {
-        return this.relations?.filter((r) => r.type === RelationType.DELETE) as IDeleteRelation[] ?? []
+        return (this.relations?.filter((r) => r.type === RelationType.DELETE) as IDeleteRelation[]) ?? []
     }
 
     private get updateRelations(): IUpdateRelation[] {
-        return this.relations?.filter((r) => r.type === RelationType.UPDATE) as IUpdateRelation[] ?? []
+        return (this.relations?.filter((r) => r.type === RelationType.UPDATE) as IUpdateRelation[]) ?? []
     }
 
     private get createRelations(): ICreateRelation[] {
-        return this.relations?.filter((r) => r.type === RelationType.CREATE) as ICreateRelation[] ?? []
+        return (this.relations?.filter((r) => r.type === RelationType.CREATE) as ICreateRelation[]) ?? []
     }
 
     private printRelationStatements(stmt: string): string {
@@ -411,7 +429,9 @@ class ${this.name}EntityClass {
                 ? `const relationPromises = [];
         ${this.deleteRelations
             .map((relation) => {
-                return `relationPromises.push(this.client.${relation.entity.toLowerCase()}.delete(${this.printRelationStatements(relation.key.partitionKey)}${relation.key.sortKey ? `, ${this.printRelationStatements(relation.key.sortKey)}` : ''}));`
+                return `relationPromises.push(this.client.${relation.entity.toLowerCase()}.delete(${this.printRelationStatements(relation.key.partitionKey)}${
+                    relation.key.sortKey ? `, ${this.printRelationStatements(relation.key.sortKey)}` : ''
+                }));`
             })
             .join('\n')}`
                 : ''
@@ -472,7 +492,7 @@ class ${this.name}EntityClass {
 
         const params = {
             TableName: this.tableName,
-            Item: marshall(values, { removeUndefinedValues: true })
+            Item: marshall(values, { removeUndefinedValues: true, convertEmptyValues: true })
         };
                 
         try {
@@ -500,7 +520,7 @@ class ${this.name}EntityClass {
             .join(", ");
         const ExpressionAttributeValues = Object.keys(item)
             .filter((key) => item[key] !== undefined && key !== "${this.partitionKey}" && key !== "${this.sortKey}")
-            .reduce((acc, key) => ({ ...acc, [\`:\${key}\`]: marshall(processValue(item[key]), { removeUndefinedValues: true }) }), {});
+            .reduce((acc, key) => ({ ...acc, [\`:\${key}\`]: marshall(processValue(item[key]), { removeUndefinedValues: true, convertEmptyValues: true }) }), {});
         const ExpressionAttributeNames = Object.keys(item)
             .filter((key) => item[key] !== undefined && key !== "${this.partitionKey}" && key !== "${this.sortKey}")
             .reduce((acc, key) => ({ ...acc, [\`#\${key}\`]: key }), {});
@@ -540,7 +560,7 @@ class ${this.name}EntityClass {
                 const params = {
                     Put: {
                         TableName: this.tableName,
-                        Item: marshall(values, { removeUndefinedValues: true })
+                        Item: marshall(values, { removeUndefinedValues: true, convertEmptyValues: true })
                     }
                 };
 
@@ -553,7 +573,7 @@ class ${this.name}EntityClass {
 
                 const ExpressionAttributeValues = Object.keys(item)
                     .filter((key) => item[key] !== undefined && key !== "${this.partitionKey}" && key !== "${this.sortKey}")
-                    .reduce((acc, key) => ({ ...acc, [\`:\${key}\`]: marshall(item[key], { removeUndefinedValues: true }) }), {});
+                    .reduce((acc, key) => ({ ...acc, [\`:\${key}\`]: marshall(item[key], { removeUndefinedValues: true, convertEmptyValues: true }) }), {});
 
                 const ExpressionAttributeNames = Object.keys(item)
                     .filter((key) => item[key] !== undefined && key !== "${this.partitionKey}" && key !== "${this.sortKey}")
@@ -586,6 +606,6 @@ class ${this.name}EntityClass {
     };
 }
 
-module.exports = { ${this.name}EntityClass };`;
+module.exports = { ${this.name}EntityClass };`
     }
 }
