@@ -90,7 +90,7 @@ function logQuery(type, entity, func, params) {
 }
  
 function logError(type, entity, func, params, error) {
-    console.error(\`[\${type}] [\${entity} - \${func}] \${JSON.stringify(params)}, error);
+    console.error(\`[\${type}] [\${entity} - \${func}] \${JSON.stringify(params)}\`, error);
 }
 
 module.exports = { parseFilterExpression, uuid, logQuery, logError };
