@@ -58,14 +58,14 @@ describe('create', () => {
         const date = new Date()
 
         const item = await client.findone2.create({
-            partitionKey: 'test_id',
+            partitionKey: 'test_id_create_pk',
             stringAttr1: 'test_value_1_create',
             stringAttr2: 'test_value_2_create',
             dateAttr: date,
         })
 
         expect(item).toStrictEqual({
-            partitionKey: 'test_id',
+            partitionKey: 'test_id_create_pk',
             stringAttr1: 'test_value_1_create',
             stringAttr2: 'test_value_2_create',
             dateAttr: date,
@@ -82,7 +82,7 @@ describe('create', () => {
         const date = new Date()
 
         const item = await client.findone3.create({
-            partitionKey: 'test_id',
+            partitionKey: 'test_id_create_pk_sk',
             sortKey: 'test_sort_key',
             stringAttr1: 'test_value_1_create',
             stringAttr2: 'test_value_2_create',
@@ -90,7 +90,7 @@ describe('create', () => {
         })
 
         expect(item).toStrictEqual({
-            partitionKey: 'test_id',
+            partitionKey: 'test_id_create_pk_sk',
             sortKey: 'test_sort_key',
             stringAttr1: 'test_value_1_create',
             stringAttr2: 'test_value_2_create',

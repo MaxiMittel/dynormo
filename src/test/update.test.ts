@@ -40,7 +40,7 @@ describe('update', () => {
         const date = new Date()
 
         const item = await client.findone2.create({
-            partitionKey: 'test_id_update',
+            partitionKey: 'test_id_update_pk',
             stringAttr1: 'test_value_1_update',
             stringAttr2: 'test_value_2_update',
             dateAttr: date,
@@ -73,7 +73,7 @@ describe('update', () => {
         const date = new Date()
 
         const item = await client.findone3.create({
-            partitionKey: 'test_id_update',
+            partitionKey: 'test_id_update_pk_sk',
             sortKey: 'test_sort_key',
             stringAttr1: 'test_value_1_update',
             stringAttr2: 'test_value_2_update',

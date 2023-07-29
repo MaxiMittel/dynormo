@@ -88,7 +88,26 @@ export class EntityGenerator {
                 return printGenerator(attr.generator)
             }
 
-            return attr.defaultValue ? printLiteral(attr.defaultValue) : ''
+            if (attr.defaultValue) {
+                return printLiteral(attr.defaultValue)
+            }
+
+            switch (attr.type) {
+                case AttributeType.LIST:
+                case AttributeType.DATE_LIST:
+                case AttributeType.MAP_LIST:
+                case AttributeType.BOOLEAN_LIST:
+                case AttributeType.NUMBER_LIST:
+                case AttributeType.STRING_LIST:
+                    return '[]'
+                case AttributeType.NUMBER_SET:
+                case AttributeType.STRING_SET:
+                    return 'new Set()'
+                case AttributeType.MAP:
+                    return '{}'
+                default:
+                    return ''
+            }
         }
 
         const printPath = (path: string[]) => {
@@ -124,8 +143,9 @@ export class EntityGenerator {
                         }
                     }
 
-                    if (attribute.generator || attribute.defaultValue) {
-                        typeString += `item${printPath([...path, key])} ?? ${defaultValue(attribute)},\n`
+                    const defaultVal = defaultValue(attribute)
+                    if (defaultVal) {
+                        typeString += `item${printPath([...path, key])} ?? ${defaultVal},\n`
                         continue
                     } else {
                         typeString += `item${printPath([...path, key])},\n`
@@ -506,11 +526,13 @@ class ${this.name}EntityClass {
     };
 
     async update(${this.printKeyParams()}, item) {
-        const processValue = (value) => {
+        const marshallValue = (value) => {
             if (value instanceof Date) {
-                return value.toISOString();
+                return { S: value.toISOString() };
+            } else if (Array.isArray(value)) {
+                return { L: value.map((item) => marshallValue(item)) };
             } else {
-                return value;
+                return marshall(value, { removeUndefinedValues: true, convertEmptyValues: true });
             }
         };
 
@@ -520,7 +542,7 @@ class ${this.name}EntityClass {
             .join(", ");
         const ExpressionAttributeValues = Object.keys(item)
             .filter((key) => item[key] !== undefined && key !== "${this.partitionKey}" && key !== "${this.sortKey}")
-            .reduce((acc, key) => ({ ...acc, [\`:\${key}\`]: marshall(processValue(item[key]), { removeUndefinedValues: true, convertEmptyValues: true }) }), {});
+            .reduce((acc, key) => ({ ...acc, [\`:\${key}\`]: marshallValue(item[key])}), {});
         const ExpressionAttributeNames = Object.keys(item)
             .filter((key) => item[key] !== undefined && key !== "${this.partitionKey}" && key !== "${this.sortKey}")
             .reduce((acc, key) => ({ ...acc, [\`#\${key}\`]: key }), {});
