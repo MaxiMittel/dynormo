@@ -8,12 +8,14 @@ export class ClientGenerator {
     public static generate(entities: string[], tableMap: { [key: string]: string }) {
         return `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
+const { Logger } = require("./Logger");
 ${entities.map((entity) => `const { ${entity}EntityClass } = require("./${entity}");`).join('\n')}
 
 
 class DynormoClient {
 	client;
     tables;
+    logger;
 ${entities.map((e) => `\t${e}CachedEntity;`).join('\n')}
 
 	constructor(config) {
@@ -27,6 +29,12 @@ ${entities.map((e) => `\t${e}CachedEntity;`).join('\n')}
 			})
 		);
         this.tables = config.tables || {};
+
+        if (Array.isArray(config.logger)) {
+            this.logger = new Logger({ modes: config.logger, depth: config.loggerDepth ?? 3 });
+        } else {
+            this.logger = config.logger || new Logger({ modes: ['log', 'error', 'warn'], depth: 3 });
+        }
 	}
 
 ${entities.map((e) => this.generateEntityGetter(e, tableMap)).join('\n')}
@@ -62,7 +70,7 @@ module.exports = { DynormoClient };
     private static generateEntityGetter(entity: string, tableMap: { [key: string]: string }) {
         return `\tget ${entity.toLowerCase()}() {
 		if (!this.${entity}CachedEntity) {
-			this.${entity}CachedEntity = new ${entity}EntityClass(this.client, this.tables["${entity}"] ?? "${tableMap[entity.toLowerCase()] ?? ""}");
+			this.${entity}CachedEntity = new ${entity}EntityClass(this.client, this.tables["${entity}"] ?? "${tableMap[entity.toLowerCase()] ?? ""}", this.logger);
 		}
 
 		return this.${entity}CachedEntity;
@@ -87,6 +95,7 @@ module.exports = { DynormoClient };
     public static generateDeclarations(entities: string[]) {
         return `import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 ${entities.map((entity) => `import { ${entity}EntityClass } from "./${entity}";`).join('\n')}
+import { ILogger, LoggerMode } from "./Logger";
 
 export type DynormoClientOptions = {
 	endpoint?: string;
@@ -100,6 +109,7 @@ export type DynormoClientOptions = {
     tables?: {
 ${entities.map((e) => `\t\t${e}?: string;`).join('\n')}
     };
+    logger?: ILogger | LoggerMode[];
 };
 
 export declare class DynormoClient {

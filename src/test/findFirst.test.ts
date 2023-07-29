@@ -9,6 +9,7 @@ describe('findFirst', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
+            logger: ['error']
         })
 
         const item = await client.findone1.findFirst({
@@ -25,6 +26,7 @@ describe('findFirst', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
+            logger: ['error']
         })
 
         const item = await client.findone1.findFirst({
@@ -41,6 +43,7 @@ describe('findFirst', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
+            logger: ['error']
         })
 
         const item = await client.findone1.findFirst({
@@ -60,6 +63,7 @@ describe('findFirst', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
+            logger: ['error']
         })
 
         const item = await client.findone3.findFirst({

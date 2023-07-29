@@ -8,6 +8,7 @@ import { ClientGenerator } from './generators/ClientGenerator'
 import { EntityDeclarationGenerator } from './generators/EntityDeclarationGenerator'
 import { writeFile } from './shared/writeFile'
 import { EntityGenerator } from './generators/EntityGenerator'
+import { logger_d_ts, logger_js } from './generators/LoggerGenerator'
 
 const program = new commander.Command()
 program.version('1.0.0').description('DynamoDB ORM')
@@ -24,6 +25,8 @@ program
 
         writeFile(path.join(outputDir, 'shared.js'), shared_js)
         writeFile(path.join(outputDir, 'shared.d.ts'), shared_d_ts)
+        writeFile(path.join(outputDir, 'Logger.js'), logger_js)
+        writeFile(path.join(outputDir, 'Logger.d.ts'), logger_d_ts)
 
         const entityNames = []
         const tableNamesMap: { [key: string]: string } = {}
@@ -62,6 +65,9 @@ program
             indexFile,
             `Object.defineProperty(exports, "__esModule", { value: true });
 const { DynormoClient } = require("./DynormoClient");
+const { Logger } = require("./Logger");
+
+exports.Logger = Logger;
 exports.DynormoClient = DynormoClient;`
         )
 
@@ -69,7 +75,8 @@ exports.DynormoClient = DynormoClient;`
         writeFile(
             indexFileDeclerations,
             `${entityNames.map((name) => `export * from "./${name}";`).join('\n')}
-export { DynormoClient } from "./DynormoClient";`
+export { DynormoClient } from "./DynormoClient";
+export { Logger } from "./Logger";`
         )
 
         const packageJson = path.join(outputDir, 'package.json')

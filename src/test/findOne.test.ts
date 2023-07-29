@@ -9,6 +9,7 @@ describe('findOne', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
+            logger: ['error']
         })
 
         const item = await client.findone1.findOne('findOne#test#01')
@@ -27,6 +28,7 @@ describe('findOne', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
+            logger: ['error']
         })
 
         const item = await client.findone1.findOne('findOne#test#not-exists')
@@ -39,6 +41,7 @@ describe('findOne', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
+            logger: ['error']
         })
 
         const item = await client.findone2.findOne('findOne#test#02')
@@ -56,6 +59,7 @@ describe('findOne', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
+            logger: ['error']
         })
 
         const item = await client.findone2.findOne('findOne#test#not-exists')
@@ -68,6 +72,7 @@ describe('findOne', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
+            logger: ['error']
         })
 
         const item = await client.findone3.findOne('findOne#test#03', 'random_key')
@@ -86,6 +91,7 @@ describe('findOne', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
+            logger: ['error']
         })
 
         const item = await client.findone3.findOne('findOne#test#not-exists', 'not-exists')

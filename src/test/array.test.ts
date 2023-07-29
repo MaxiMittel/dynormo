@@ -9,6 +9,7 @@ describe('array', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
+            logger: ['error']
         })
 
         const item = await client.arraytest.create({
@@ -40,6 +41,7 @@ describe('array', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
+            logger: ['error']
         })
 
         const item = await client.arraytest.create({
@@ -71,6 +73,7 @@ describe('array', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
+            logger: ['error']
         })
 
         const item = await client.arraytest.create({

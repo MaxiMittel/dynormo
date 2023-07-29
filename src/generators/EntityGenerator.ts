@@ -294,18 +294,18 @@ export class EntityGenerator {
 const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 const {
   parseFilterExpression,
-  uuid,
-  logQuery,
-  logError
+  uuid
 } = require("./shared");
 
 class ${this.name}EntityClass {
     client;
     tableName;
+    logger;
   
-    constructor(client, tableName) {
+    constructor(client, tableName, logger) {
         this.client = client;
         this.tableName = tableName;
+        this.logger = logger;
     }
 
     async findOne(${this.printKeyParams()}) {
@@ -315,7 +315,7 @@ class ${this.name}EntityClass {
         };
 
         try {
-            logQuery("GET", "${this.name}", "findOne", params);
+            this.logger.log('[${this.name}][findOne]', params);
             const { Item } = await this.client.send(new GetItemCommand(params));
             if (!Item) {
                 return null;
@@ -323,8 +323,8 @@ class ${this.name}EntityClass {
 
             return this.map${this.name}(unmarshall(Item));
         } catch (err) {
-            logError("GET", "${this.name}", "findOne", params, err);
-            throw new Error("An error occurred while trying to find the item");
+            this.logger.error('[${this.name}][findOne]', params, err);
+            throw new Error("An error occurred while trying to find the item. Additional information above.");
         }
     };
 
@@ -353,7 +353,7 @@ class ${this.name}EntityClass {
             };
 
             try {
-                logQuery("SCAN", "${this.name}", "findMany", params);
+                this.logger.log('[${this.name}][findMany]', params);
                 const response = await this.client.send(new ScanCommand(params));
 
                 if (!response.Items) {
@@ -366,8 +366,8 @@ class ${this.name}EntityClass {
                     count: response.Items.length,
                 };
             } catch (err) {
-                logError("SCAN", "${this.name}", "findMany", params, err);
-                throw new Error("An error occurred while trying to find the items");
+                this.logger.error('[${this.name}][findMany]', params, err);
+                throw new Error("An error occurred while trying to find the items. Additional information above.");
             }
         } else {
             const {
@@ -391,7 +391,7 @@ class ${this.name}EntityClass {
             };
 
             try {
-                logQuery("QUERY", "${this.name}", "findMany", params);
+                this.logger.log('[${this.name}][findMany]', params);
                 const response = await this.client.send(new QueryCommand(params));
 
                 if (!response.Items) {
@@ -404,8 +404,8 @@ class ${this.name}EntityClass {
                     count: response.Items.length,
                 };
             } catch (err) {
-                logError("QUERY", "${this.name}", "findMany", params, err);
-                throw new Error("An error occurred while trying to find the items");
+                this.logger.error('[${this.name}][findMany]', params, err);
+                throw new Error("An error occurred while trying to find the items. Additional information above.");
             }
         }
     };
@@ -459,11 +459,11 @@ class ${this.name}EntityClass {
         ${this.deleteRelations.length > 0 ? `await Promise.all(relationPromises);` : ''}
 
         try {
-            logQuery("DELETE", "${this.name}", "delete", params);
+            this.logger.log("[${this.name}][delete]", params);
             await this.client.send(new DeleteItemCommand(params));
         } catch (err) {
-            logError("DELETE", "${this.name}", "delete", params, err);
-            throw new Error("An error occurred while trying to delete the item");
+            this.logger.error("[${this.name}][delete]", params, err);
+            throw new Error("An error occurred while trying to delete the item. Additional information above.");
         }
     };
 
@@ -493,7 +493,7 @@ class ${this.name}EntityClass {
                         },
                     };
 
-                    logQuery("BATCH_WRITE", "${this.name}", "deleteMany", params);
+                    this.logger.log("[${this.name}][deleteMany]", params);
                     await this.client.send(new BatchWriteItemCommand(params));
                 })();
 
@@ -502,8 +502,8 @@ class ${this.name}EntityClass {
             
             await Promise.all(promises);
         } catch (err) {
-            logError("BATCH_WRITE", "${this.name}", "deleteMany", params, err);
-            throw new Error("An error occurred while trying to delete the items");
+            this.logger.error("[${this.name}][deleteMany]", null, err);
+            throw new Error("An error occurred while trying to delete the items. Additional information above.");
         }
     }
 
@@ -516,12 +516,12 @@ class ${this.name}EntityClass {
         };
                 
         try {
-            logQuery("PUT", "${this.name}", "create", params);
+            this.logger.log("[${this.name}][create]", params);
             await this.client.send(new PutItemCommand(params));
             return this.map${this.name}(values);
         } catch (err) {
-            logError("PUT", "${this.name}", "create", params, err);
-            throw new Error("Failed to create ${this.name}");
+            this.logger.error("[${this.name}][create]", params, err);
+            throw new Error("An error occurred while trying to create the item. Additional information above.");
         }
     };
 
@@ -557,7 +557,7 @@ class ${this.name}EntityClass {
         };
 
         try {
-            logQuery("UPDATE", "${this.name}", "update", params);
+            this.logger.log("[${this.name}][update]", params);
             const result = await this.client.send(new UpdateItemCommand(params));
 
             if (!result.Attributes) {
@@ -566,8 +566,8 @@ class ${this.name}EntityClass {
 
             return this.map${this.name}(unmarshall(result.Attributes));
         } catch (err) {
-            logError("UPDATE", "${this.name}", "update", params, err);
-            throw new Error("Failed to update ${this.name}");
+            this.logger.error("[${this.name}][update]", params, err);
+            throw new Error("An error occurred while trying to update the item. Additional information above.");
         }
     };
 

@@ -9,6 +9,7 @@ describe('update', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
+            logger: ['error']
         })
 
 
@@ -35,6 +36,7 @@ describe('update', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
+            logger: ['error']
         })
 
         const date = new Date()
@@ -68,6 +70,7 @@ describe('update', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
+            logger: ['error']
         })
 
         const date = new Date()

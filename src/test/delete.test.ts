@@ -9,6 +9,7 @@ describe('delete', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
+            logger: ['error']
         })
 
         const item = await client.findone1.create({
@@ -32,6 +33,7 @@ describe('delete', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
+            logger: ['error']
         })
 
         const item = await client.findone2.create({
@@ -57,6 +59,7 @@ describe('delete', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
+            logger: ['error']
         })
 
         const time = Date.now();

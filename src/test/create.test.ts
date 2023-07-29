@@ -9,6 +9,7 @@ describe('create', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
+            logger: ['error']
         })
 
         const date = new Date()
@@ -34,6 +35,7 @@ describe('create', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
+            logger: ['error']
         })
 
         const item = await client.findone1.create({
@@ -53,6 +55,7 @@ describe('create', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
+            logger: ['error']
         })
 
         const date = new Date()
@@ -77,6 +80,7 @@ describe('create', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
+            logger: ['error']
         })
 
         const date = new Date()

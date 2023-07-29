@@ -84,16 +84,8 @@ function parseFilterExpression(filter) {
 function uuid() {
     return randomUUID();
 }
- 
-function logQuery(type, entity, func, params) {
-    console.log(\`[\${type}] [\${entity} - \${func}] \${JSON.stringify(params)}\`);
-}
- 
-function logError(type, entity, func, params, error) {
-    console.error(\`[\${type}] [\${entity} - \${func}] \${JSON.stringify(params)}\`, error);
-}
 
-module.exports = { parseFilterExpression, uuid, logQuery, logError };
+module.exports = { parseFilterExpression, uuid };
 `
 
 export const shared_d_ts = `export type FilterExpression<T> = {
@@ -114,6 +106,4 @@ export declare function parseFilterExpression<T extends {
 };
 
 export declare function uuid(): string;
-export declare function logQuery(type: string, entity: string, func: string, params: any): void;
-export declare function logError(type: string, entity: string, func: string, params: any, error: any): void;
 `
