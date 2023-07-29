@@ -123,7 +123,7 @@ export class EntityDeclarationGenerator {
     private printKeyConditionType(): string {
         const params = []
         if (this.partitionKey) {
-            params.push(`  ${this.partitionKey}?: FilterExpression<${this.partitionKeyType}> | ${this.partitionKeyType};`)
+            params.push(`  ${this.partitionKey}?: ${this.partitionKeyType};`)
         }
 
         if (this.sortKey) {
