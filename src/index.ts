@@ -11,7 +11,7 @@ import { EntityGenerator } from './generators/EntityGenerator'
 import { logger_d_ts, logger_js } from './generators/LoggerGenerator'
 
 const program = new commander.Command()
-program.version('1.0.0').description('DynamoDB ORM')
+program.version('1.1.0').description('Dynormo CLI')
 
 program
     .command('generate')
@@ -32,7 +32,7 @@ program
         const tableNamesMap: { [key: string]: string } = {}
         for (const file of config.entities) {
             const definition = JSON.parse(fs.readFileSync(file, 'utf-8'))
-            const entity = new EntityGenerator(definition.name, definition.attributes, definition.relations || [])
+            const entity = new EntityGenerator(definition.name, definition.attributes)
 
             const entityDeclerations = new EntityDeclarationGenerator({
                 name: definition.name,

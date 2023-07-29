@@ -1,7 +1,5 @@
 import { AttributeType } from '../enums/AttributeType'
-import { RelationType } from '../enums/RelationType'
 import { IAttribute } from '../interfaces/IAttribute'
-import { ICreateRelation, IDeleteRelation, IRelation, IUpdateRelation } from '../interfaces/IRelation'
 import { printGenerator } from '../shared/printGenerator'
 import { printLiteral } from '../shared/printLiteral'
 import { AttributeMap } from '../types/AttributeMap'
@@ -10,16 +8,14 @@ import { DatabaseType } from '../types/DatabaseType'
 export class EntityGenerator {
     private readonly name: string
     private readonly attributes: AttributeMap
-    private readonly relations: IRelation[]
     private partitionKey: string
     private partitionKeyStaticValue?: DatabaseType
     private sortKey?: string
     private sortKeyStaticValue?: DatabaseType
 
-    constructor(name: string, attributes: AttributeMap, relations: IRelation[]) {
+    constructor(name: string, attributes: AttributeMap) {
         this.name = name
         this.attributes = attributes
-        this.relations = relations
 
         for (const key in attributes) {
             const attribute = attributes[key]
@@ -257,26 +253,6 @@ export class EntityGenerator {
         return `{\n${item(attributes, 2, [])}\t\t}`
     }
 
-    private get deleteRelations(): IDeleteRelation[] {
-        return (this.relations?.filter((r) => r.type === RelationType.DELETE) as IDeleteRelation[]) ?? []
-    }
-
-    private get updateRelations(): IUpdateRelation[] {
-        return (this.relations?.filter((r) => r.type === RelationType.UPDATE) as IUpdateRelation[]) ?? []
-    }
-
-    private get createRelations(): ICreateRelation[] {
-        return (this.relations?.filter((r) => r.type === RelationType.CREATE) as ICreateRelation[]) ?? []
-    }
-
-    private printRelationStatements(stmt: string): string {
-        if (stmt.startsWith('{')) {
-            return stmt.substring(1, stmt.length - 1)
-        }
-
-        return stmt
-    }
-
     /**
      * Generates the class definition for the entity
      * @returns {string} The generated code
@@ -301,6 +277,9 @@ class ${this.name}EntityClass {
     client;
     tableName;
     logger;
+    subscribersCreate = [];
+    subscribersUpdate = [];
+    subscribersDelete = [];
   
     constructor(client, tableName, logger) {
         this.client = client;
@@ -444,23 +423,18 @@ class ${this.name}EntityClass {
             Key: marshall({ ${this.printKeyExpression()} }, { removeUndefinedValues: true }),
         };
 
-        ${
-            this.deleteRelations.length > 0
-                ? `const relationPromises = [];
-        ${this.deleteRelations
-            .map((relation) => {
-                return `relationPromises.push(this.client.${relation.entity.toLowerCase()}.delete(${this.printRelationStatements(relation.key.partitionKey)}${
-                    relation.key.sortKey ? `, ${this.printRelationStatements(relation.key.sortKey)}` : ''
-                }));`
-            })
-            .join('\n')}`
-                : ''
+        let item;
+        if (this.subscribersDelete.length) {
+            item = await this.findOne(...arguments);
         }
-        ${this.deleteRelations.length > 0 ? `await Promise.all(relationPromises);` : ''}
 
         try {
             this.logger.log("[${this.name}][delete]", params);
             await this.client.send(new DeleteItemCommand(params));
+
+            if (this.subscribersDelete.length) {
+                this.notifySubscribers("DELETE", item);
+            }
         } catch (err) {
             this.logger.error("[${this.name}][delete]", params, err);
             throw new Error("An error occurred while trying to delete the item. Additional information above.");
@@ -501,6 +475,12 @@ class ${this.name}EntityClass {
             }
             
             await Promise.all(promises);
+
+            if (this.subscribersDelete.length) {
+                for (const item of items) {
+                    this.notifySubscribers("DELETE", item);
+                }
+            }
         } catch (err) {
             this.logger.error("[${this.name}][deleteMany]", null, err);
             throw new Error("An error occurred while trying to delete the items. Additional information above.");
@@ -518,7 +498,13 @@ class ${this.name}EntityClass {
         try {
             this.logger.log("[${this.name}][create]", params);
             await this.client.send(new PutItemCommand(params));
-            return this.map${this.name}(values);
+            const insertedItem = this.map${this.name}(values);
+
+            if (this.subscribersCreate.length) {
+                this.notifySubscribers("CREATE", insertedItem);
+            }
+
+            return insertedItem;
         } catch (err) {
             this.logger.error("[${this.name}][create]", params, err);
             throw new Error("An error occurred while trying to create the item. Additional information above.");
@@ -564,7 +550,13 @@ class ${this.name}EntityClass {
                 throw new Error("Failed to update ${this.name}");
             }
 
-            return this.map${this.name}(unmarshall(result.Attributes));
+            const updatedItem = this.map${this.name}(unmarshall(result.Attributes));
+
+            if (this.subscribersUpdate.length) {
+                this.notifySubscribers("UPDATE", updatedItem);
+            }
+
+            return updatedItem;
         } catch (err) {
             this.logger.error("[${this.name}][update]", params, err);
             throw new Error("An error occurred while trying to update the item. Additional information above.");
@@ -574,6 +566,40 @@ class ${this.name}EntityClass {
     map${this.name}(item) {
         return ${this.printMapper()};
     };
+
+    subscribe(event, callback) {
+        switch (event) {
+            case "CREATE":
+                this.subscribersCreate.push(callback);
+                break;
+            case "UPDATE":
+                this.subscribersUpdate.push(callback);
+                break;
+            case "DELETE":
+                this.subscribersDelete.push(callback);
+                break;
+            default:
+                throw new Error("Invalid event type");
+        }
+    }
+
+    notifySubscribers(event, item) {
+        if (event === "CREATE") {
+            for (const subscriber of this.subscribersCreate) {
+                subscriber(item);
+            }
+        } else if (event === "UPDATE") {
+            for (const subscriber of this.subscribersUpdate) {
+                subscriber(item);
+            }
+        } else if (event === "DELETE") {
+            for (const subscriber of this.subscribersDelete) {
+                subscriber(item);
+            }
+        } else {
+            throw new Error("Invalid event type");
+        }
+    }
 
     get $transaction() {
         return {

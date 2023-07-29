@@ -142,7 +142,7 @@ export class EntityDeclarationGenerator {
      */
     public generate(): string {
         return `import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { FilterExpression } from "./shared";
+import { FilterExpression, ItemEvent } from "./shared";
 
 export ${this.keyword} ${this.name}Entity ${this.equals}{
 ${printObject(this.attributes, PrintMode.FULL, 1)}}
@@ -202,6 +202,9 @@ export declare class ${this.name}EntityClass {
   deleteMany(query: ${this.name}FindManyInput): Promise<void>;
   create(item: Create${this.name}Input): Promise<${this.name}Entity>;
   update(${this.printKeyParams()}, item: Update${this.name}Input): Promise<${this.name}Entity>;
+  subscribe(event: ItemEvent, handler: (item: ${this.name}Entity) => void): void;
+
+  private notifySubscribers(event: ItemEvent, item: ${this.name}Entity): Promise<void>;
 }`
     }
 }

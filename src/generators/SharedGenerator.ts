@@ -106,4 +106,10 @@ export declare function parseFilterExpression<T extends {
 };
 
 export declare function uuid(): string;
+
+export enum ItemEvent {
+    CREATE = 'CREATE',
+    UPDATE = 'UPDATE',
+    DELETE = 'DELETE'
+}
 `
