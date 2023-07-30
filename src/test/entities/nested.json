@@ -1,0 +1,57 @@
+{
+    "name": "NestedTestModel",
+    "table": "dynormo-test",
+    "attributes": {
+        "partitionKey": {
+            "type": "string",
+            "partitionKey": true,
+            "generator": "UUID"
+        },
+        "sortKey": {
+            "type": "string",
+            "sortKey": true,
+            "staticValue": "static_key"
+        },
+        "nestedAttr1": {
+            "type": "map",
+            "properties": {
+                "nestedAttr1_1": {
+                    "type": "string"
+                },
+                "nestedAttr1_2": {
+                    "type": "number"
+                }
+            }
+        },
+        "nestedAttr2": {
+            "type": "map",
+            "properties": {
+                "nestedAttr2_1": {
+                    "type": "string"
+                },
+                "nestedAttr2_2": {
+                    "type": "map",
+                    "properties": {
+                        "nestedAttr2_2_1": {
+                            "type": "string"
+                        },
+                        "nestedAttr2_2_2": {
+                            "type": "number"
+                        }
+                    }
+                }
+            }
+        },
+        "nestedArrayAttr1": {
+            "type": "list<map>",
+            "properties": {
+                "nestedAttr1_1": {
+                    "type": "string"
+                },
+                "nestedAttr1_2": {
+                    "type": "number"
+                }
+            }
+        }
+    }
+}

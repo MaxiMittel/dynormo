@@ -517,6 +517,8 @@ class ${this.name}EntityClass {
                 return { S: value.toISOString() };
             } else if (Array.isArray(value)) {
                 return { L: value.map((item) => marshallValue(item)) };
+            } else if (typeof value === "object" && !(value instanceof Set)) {
+                return { M: Object.keys(value).reduce((acc, key) => ({ ...acc, [key]: marshallValue(value[key]) }), {}) };
             } else {
                 return marshall(value, { removeUndefinedValues: true, convertEmptyValues: true });
             }

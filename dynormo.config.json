@@ -1,5 +1,5 @@
 {
-    "entities": ["src/test/entities/findOne_1.json", "src/test/entities/findOne_2.json", "src/test/entities/findOne_3.json", "src/test/entities/array.json"],
+    "entities": ["src/test/entities/findOne_1.json", "src/test/entities/findOne_2.json", "src/test/entities/findOne_3.json", "src/test/entities/array.json", "src/test/entities/nested.json"],
     "options": {
         "generate": "classes"
     }
