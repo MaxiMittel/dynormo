@@ -10,16 +10,27 @@ import { writeFile } from './shared/writeFile'
 import { EntityGenerator } from './generators/EntityGenerator'
 import { logger_d_ts, logger_js } from './generators/LoggerGenerator'
 
+const VERSION = '1.1.0'
+
 const program = new commander.Command()
-program.version('1.1.0').description('Dynormo CLI')
+program.version(VERSION).description('Dynormo CLI')
 
 program
     .command('generate')
     .description('Generate type and function definition from the schema')
     .option('-c, --config <config>', 'Config file')
     .action(async (_str, options) => {
+        console.log(`> dynormo v${VERSION}\n`);
+
         const configPath = options.config ? options.config : './dynormo.config.json'
-        const config = JSON.parse(fs.readFileSync(path.resolve(configPath), 'utf-8'))
+        let config;
+        try {
+            config = JSON.parse(fs.readFileSync(path.resolve(configPath), 'utf-8'))
+            console.log(`Found config file at ${configPath}\n`)
+        } catch (error) {
+            console.log(`Error: No config file found at ${configPath}`)
+            return
+        }
 
         const outputDir = path.resolve('node_modules/.dynormo')
 
@@ -55,6 +66,8 @@ program
 
             writeFile(filePath, entity.generate())
             writeFile(filePathDeclerations, entityDeclerations.generate())
+
+            console.log(`Generated ${definition.name} entity`)
         }
 
         writeFile(path.join(outputDir, 'DynormoClient.js'), ClientGenerator.generate(entityNames, tableNamesMap))
@@ -81,6 +94,8 @@ export { Logger } from "./Logger";`
 
         const packageJson = path.join(outputDir, 'package.json')
         writeFile(packageJson, JSON.stringify({ name: '.dynormo', main: './index.js', types: './index.d.ts' }, null, 2))
+
+        console.log(`\nSuccessfully generated ${entityNames.length} entities in ${outputDir}`)
     })
 
 program.parse(process.argv)
