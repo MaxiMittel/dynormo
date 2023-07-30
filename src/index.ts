@@ -98,4 +98,26 @@ export { Logger } from "./Logger";`
         console.log(`\nSuccessfully generated ${entityNames.length} entities in ${outputDir}`)
     })
 
+program
+    .command('init')
+    .description('Create a new dynormo.config.json file')
+    .action(async () => {
+        const configPath = './dynormo.config.json'
+        if (fs.existsSync(configPath)) {
+            console.log(`Error: Config file already exists at ${configPath}`)
+            return
+        }
+
+        const config = {
+            entities: [],
+            options: {
+                generate: 'types',
+            },
+        }
+
+        writeFile(configPath, JSON.stringify(config, null, 2))
+
+        console.log(`Successfully created config file at ${configPath}`)
+    })
+
 program.parse(process.argv)
