@@ -39,6 +39,10 @@ ${entities.map((e) => `\t${e}CachedEntity;`).join('\n')}
 
 ${entities.map((e) => this.generateEntityGetter(e, tableMap)).join('\n')}
 
+    get rawClient() {
+        return this.client;
+    }
+
     $transaction(input) {
         const chunks = [];
         for (let i = 0; i < input.length; i += 25) {
@@ -118,6 +122,8 @@ export declare class DynormoClient {
 	constructor(config: DynormoClientOptions);
 
 ${entities.map((e) => this.generateEntityGetterDeclaration(e)).join('\n')}
+
+    get rawClient(): DynamoDBClient;
 
     $transaction(input: (() => { params: string, item: any | null})[]): Promise<void>;
 }
