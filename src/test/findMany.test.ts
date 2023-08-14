@@ -131,7 +131,7 @@ describe('findMany', () => {
             },
             {
                 partitionKey: 'findMany#test#10',
-                sortKey: 'findMany#test#10#02',
+                sortKey: 'findMany#test#10#03',
                 dateAttr: new Date('2023-10-10T00:00:00.000Z'),
                 stringAttr1: 'test_value_2',
                 stringAttr2: 'test_attr_2',
@@ -141,5 +141,50 @@ describe('findMany', () => {
         for (const expectedItem of expectedItems) {
             expect(item.items).toContainEqual(expectedItem)
         }
+    })
+
+    test('pK - static sK - in', async () => {
+        const client = new DynormoClient({
+            client: new DynamoDBClient({
+                region: 'eu-central-1',
+            }),
+            logger: ['error', 'log']
+        })
+
+        await client.findone1.create({
+            partitionKey: 'findOne#in#test#01',
+            sortKey: 'static_key',
+            stringAttr1: 'test_attr_in_1',
+            stringAttr2: 'test_attr_2',
+            dateAttr: new Date('2023-10-10T00:00:00.000Z'),
+        })
+
+        await client.findone1.create({
+            partitionKey: 'findOne#in#test#02',
+            sortKey: 'static_key',
+            stringAttr1: 'test_attr_in_2',
+            stringAttr2: 'test_attr_2',
+            dateAttr: new Date('2023-10-10T00:00:00.000Z'),
+        })
+
+        await client.findone1.create({
+            partitionKey: 'findOne#in#test#03',
+            sortKey: 'static_key',
+            stringAttr1: 'test_attr_not_in_1',
+            stringAttr2: 'test_attr_2',
+            dateAttr: new Date('2023-10-10T00:00:00.000Z'),
+        })
+
+        const results = await client.findone1.findMany({
+            where: {
+                stringAttr1: {
+                    in: ['test_attr_in_1', 'test_attr_in_2'],
+                },
+            },
+        });
+
+        console.log(results);
+
+        expect(results.count).toBe(2)
     })
 })

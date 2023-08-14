@@ -35,6 +35,10 @@ function parseFilterExpression(filter) {
                             FilterExpressionItems.push(\`#\${prefix}\${key} = :\${prefix}\${key}\`)
                             ExpressionAttributeNames[\`#\${prefix}\${key}\`] = key
                             ExpressionAttributeValues[\`:\${prefix}\${key}\`] = marshall(item[itemKey], { removeUndefinedValues: true })
+                        } else if (itemKey === 'ne') {
+                            FilterExpressionItems.push(\`#\${prefix}\${key} <> :\${prefix}\${key}\`)
+                            ExpressionAttributeNames[\`#\${prefix}\${key}\`] = key
+                            ExpressionAttributeValues[\`:\${prefix}\${key}\`] = marshall(item[itemKey], { removeUndefinedValues: true })
                         } else if (itemKey === 'g') {
                             FilterExpressionItems.push(\`#\${prefix}\${key} > :\${prefix}\${key}\`)
                             ExpressionAttributeNames[\`#\${prefix}\${key}\`] = key
@@ -59,6 +63,19 @@ function parseFilterExpression(filter) {
                                 ExpressionAttributeValues[\`:\${prefix}\${key}0\`] = marshall(item[itemKey][0], { removeUndefinedValues: true })
                                 ExpressionAttributeValues[\`:\${prefix}\${key}1\`] = marshall(item[itemKey][1], { removeUndefinedValues: true })
                             }
+                        } else if (itemKey === 'in') {
+                            if (!Array.isArray(item[itemKey])) return
+                            const keyName = \`\${prefix}\${key}\`
+                            const keyNameList = item[itemKey].map((_, i) => \`\${keyName}\${i}\`)
+                            ExpressionAttributeNames[\`#\${keyName}\`] = key
+                            FilterExpressionItems.push(\`#\${keyName} IN (\${keyNameList.map((_, i) => \`:\${keyName}\${i}\`).join(', ')})\`)
+                            item[itemKey].forEach((v, i) => {
+                                ExpressionAttributeValues[\`:\${keyName}\${i}\`] = marshall(v, { removeUndefinedValues: true })
+                            })
+                        } else if (itemKey === 'contains') {
+                            FilterExpressionItems.push(\`contains(#\${prefix}\${key}, :\${prefix}\${key})\`)
+                            ExpressionAttributeNames[\`#\${prefix}\${key}\`] = key
+                            ExpressionAttributeValues[\`:\${prefix}\${key}\`] = marshall(item[itemKey], { removeUndefinedValues: true })
                         }
                     })
                 } else {
@@ -96,7 +113,20 @@ export const shared_d_ts = `export type FilterExpression<T> = {
     l?: T;
     le?: T;
     between?: [T, T];
+    in?: T[];
+    contains?: T;
 };
+
+export type KeyConditionExpression<T> = {
+    beginsWith?: T;
+    eq?: T;
+    g?: T;
+    ge?: T;
+    l?: T;
+    le?: T;
+    between?: [T, T];
+};
+
 export declare function parseFilterExpression<T extends {
     [key: string]: any;
 }>(filter: T): {

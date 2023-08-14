@@ -52,6 +52,7 @@ program
             const entityDeclerations = new EntityDeclarationGenerator({
                 name: definition.name,
                 attributes: definition.attributes,
+                indexes: definition.indexes,
                 entities: {
                     generate: config?.options?.generate ?? 'types',
                 },

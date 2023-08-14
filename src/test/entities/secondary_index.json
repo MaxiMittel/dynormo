@@ -1,0 +1,37 @@
+{
+    "name": "SecondaryIndex",
+    "table": "dynormo-secondary-index",
+    "attributes": {
+        "partitionKey": {
+            "type": "string",
+            "partitionKey": true,
+            "generator": "UUID"
+        },
+        "sortKey": {
+            "type": "string",
+            "sortKey": true,
+            "staticValue": "static_key"
+        },
+        "pk2": {
+            "type": "string"
+        },
+        "sk2": {
+            "type": "string"
+        },
+        "secondary_sk": {
+            "type": "string"
+        }
+    },
+    "indexes": [
+        {
+            "name": "pk2-sk2-index",
+            "partitionKey": "pk2",
+            "sortKey": "sk2"
+        },
+        {
+            "name": "secondary-sk-index",
+            "partitionKey": "partitionKey",
+            "sortKey": "secondary_sk"
+        }
+    ]
+}

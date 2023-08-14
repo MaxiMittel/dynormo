@@ -9,7 +9,7 @@ describe('array', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
-            logger: ['error']
+            logger: ['error'],
         })
 
         const item = await client.arraytest.create({
@@ -41,7 +41,7 @@ describe('array', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
-            logger: ['error']
+            logger: ['error'],
         })
 
         const item = await client.arraytest.create({
@@ -73,7 +73,7 @@ describe('array', () => {
             client: new DynamoDBClient({
                 region: 'eu-central-1',
             }),
-            logger: ['error']
+            logger: ['error'],
         })
 
         const item = await client.arraytest.create({
@@ -88,5 +88,37 @@ describe('array', () => {
         expect(itemExists.arrayAttr2).toEqual([1, 2, 3])
 
         await client.arraytest.delete(item.partitionKey)
+    })
+
+    test('contains array', async () => {
+        const client = new DynormoClient({
+            client: new DynamoDBClient({
+                region: 'eu-central-1',
+            }),
+            logger: ['error'],
+        })
+
+        await client.arraytest.create({
+            partitionKey: 'test_id_in_1',
+            arrayAttr2: [1, 2, 3, 56],
+        })
+
+        await client.arraytest.create({
+            partitionKey: 'test_id_in_2',
+            arrayAttr2: [1, 2, 3],
+        })
+
+        const result = await client.arraytest.findMany({
+            where: {
+                arrayAttr2: {
+                    contains: 56,
+                },
+            },
+        })
+
+        expect(result.items.length).toEqual(1)
+
+        await client.arraytest.delete('test_id_in_1')
+        await client.arraytest.delete('test_id_in_2')
     })
 })

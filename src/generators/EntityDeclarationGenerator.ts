@@ -3,10 +3,12 @@ import { PrintMode } from '../enums/PrintMode'
 import { printObject, printType } from '../shared/printType'
 import { AttributeMap } from '../types/AttributeMap'
 import { DatabaseType } from '../types/DatabaseType'
+import { SecondaryIndex } from '../types/SecondaryIndex'
 
 export type EntityDeclarationGeneratorOptions = {
     name: string
     attributes: AttributeMap
+    indexes?: SecondaryIndex[]
     entities: {
         generate: 'types' | 'classes'
     }
@@ -15,6 +17,7 @@ export type EntityDeclarationGeneratorOptions = {
 export class EntityDeclarationGenerator {
     name: string
     attributes: AttributeMap
+    indexes: SecondaryIndex[] = []
     mode: 'types' | 'classes' = 'types'
     partitionKey: string
     partitionKeyType: string
@@ -26,6 +29,7 @@ export class EntityDeclarationGenerator {
     constructor(options: EntityDeclarationGeneratorOptions) {
         this.name = options.name
         this.attributes = options.attributes
+        this.indexes = options.indexes ?? []
         this.mode = options.entities?.generate ?? 'types'
 
         for (const key in this.attributes) {
@@ -123,12 +127,26 @@ export class EntityDeclarationGenerator {
     private printKeyConditionType(): string {
         const params = []
         if (this.partitionKey) {
-            params.push(`  ${this.partitionKey}?: ${this.partitionKeyType};`)
+            params.push(`  ${this.partitionKey}: ${this.partitionKeyType};`)
         }
 
         if (this.sortKey) {
-            params.push(`  ${this.sortKey}?: FilterExpression<${this.sortKeyType}> | ${this.sortKeyType};`)
+            params.push(`  ${this.sortKey}?: KeyConditionExpression<${this.sortKeyType}> | ${this.sortKeyType};`)
         }
+
+        /*this.indexes.forEach((index) => {
+            if (index.partitionKey && index.partitionKey !== this.partitionKey) {
+                params.push(`  ${index.partitionKey}?: ${printType(this.attributes[index.partitionKey], PrintMode.DEFAULT, 0 )};`)
+            }
+
+            if (index.sortKey && index.sortKey !== this.sortKey) {
+                params.push(`  ${index.sortKey}?: KeyConditionExpression<${printType(this.attributes[index.sortKey], PrintMode.DEFAULT, 0)}> | ${printType(
+                    this.attributes[index.sortKey],
+                    PrintMode.DEFAULT,
+                    0
+                )};`)
+            }
+        });*/
 
         return `export type ${this.name}KeyCondition = {
   OR?: ${this.name}KeyCondition[];
@@ -142,7 +160,7 @@ export class EntityDeclarationGenerator {
      */
     public generate(): string {
         return `import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { FilterExpression, ItemEvent } from "./shared";
+import { FilterExpression, KeyConditionExpression, ItemEvent } from "./shared";
 
 export ${this.keyword} ${this.name}Entity ${this.equals}{
 ${printObject(this.attributes, PrintMode.FULL, 1)}}
