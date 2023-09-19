@@ -88,6 +88,10 @@ export class EntityGenerator {
                 return printLiteral(attr.defaultValue)
             }
 
+            if (attr.nullable) {
+                return 'null'
+            }
+
             switch (attr.type) {
                 case AttributeType.LIST:
                 case AttributeType.DATE_LIST:
@@ -120,7 +124,7 @@ export class EntityGenerator {
                     typeString += `${'\t'.repeat(indent)}${key}: `
 
                     if (attribute.type === AttributeType.DATE) {
-                        if (attribute.generator || attribute.defaultValue) {
+                        if (attribute.generator || attribute.defaultValue || attribute.nullable) {
                             typeString += `item${printPath([...path, key])} ? item${printPath([...path, key])}.toISOString() : ${defaultValue(attribute)},\n`
                             continue
                         } else {
@@ -130,7 +134,7 @@ export class EntityGenerator {
                     }
 
                     if (attribute.type === AttributeType.DATE_LIST) {
-                        if (attribute.generator || attribute.defaultValue) {
+                        if (attribute.generator || attribute.defaultValue || attribute.nullable) {
                             typeString += `item${printPath([...path, key])} ? item${printPath([...path, key])}?.map((date) => date.toISOString()) : ${defaultValue(attribute)},\n`
                             continue
                         } else {

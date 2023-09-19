@@ -1,0 +1,19 @@
+{
+    "name": "Date",
+    "table": "dynormo-test-single-key",
+    "attributes": {
+        "partitionKey": {
+            "type": "string",
+            "partitionKey": true,
+            "generator": "UUID"
+        },
+        "dateAttr": {
+            "type": "date",
+            "generator": "NOW"
+        },
+        "dateAttr2": {
+            "type": "date",
+            "nullable": true
+        }
+    }
+}

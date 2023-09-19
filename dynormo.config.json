@@ -5,7 +5,8 @@
         "src/test/entities/findOne_3.json",
         "src/test/entities/array.json",
         "src/test/entities/nested.json",
-        "src/test/entities/secondary_index.json"
+        "src/test/entities/secondary_index.json",
+        "src/test/entities/date.json"
     ],
     "options": {
         "generate": "classes"
