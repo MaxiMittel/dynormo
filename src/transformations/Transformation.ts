@@ -8,6 +8,7 @@ export class Transformation<T> {
     private transformations: ((item: T) => T)[] = []
     private filterFunctions: ((item: T) => boolean)[] = []
     private removeFunctions: ((item: T) => boolean)[] = []
+    private addItems: T[] = []
 
     constructor(table: string, client: DynamoDBClient) {
         this.table = table
@@ -124,6 +125,16 @@ export class Transformation<T> {
     }
 
     /**
+     * Adds a new item to the table.
+     * @param {T} item The item to add to the table
+     * @returns The Transformation object
+     */
+    public add(item: T): Transformation<T> {
+        this.addItems.push(item)
+        return this;
+    }
+
+    /**
      * Backs up the table before transforming it.
      * @param {string} name The name of the backup
      */
@@ -218,11 +229,31 @@ export class Transformation<T> {
             )
         })
 
+        // Add items
+        const chunkedAddItems = chunkArray(this.addItems, 25)
+        chunkedAddItems.map(async (chunk: T[]) => {
+            await this.client.send(
+                new BatchWriteItemCommand({
+                    RequestItems: {
+                        [this.table]: chunk.map((item: T) => {
+                            return {
+                                PutRequest: {
+                                    Item: marshall(item),
+                                },
+                            }
+                        }),
+                    },
+                })
+            )
+        })
+
         await Promise.all(chunkedItemsToRemove)
         await Promise.all(chunkedTransformedItems)
+        await Promise.all(chunkedAddItems)
 
         console.log(`Transformed ${transformedItems.length} items`)
         console.log(`Removed ${itemsToRemove.length} items`)
+        console.log(`Added ${this.addItems.length} items`)
     }
 
     /**
