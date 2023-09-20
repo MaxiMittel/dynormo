@@ -221,7 +221,7 @@ export class EntityGenerator {
 
                     switch (attribute.type) {
                         case AttributeType.DATE:
-                            typeString += `new Date(item${printPath([...path, key])}),\n`
+                            typeString += `item${printPath([...path, key])} ? new Date(item${printPath([...path, key])}) : null,\n`
                             continue
                         case AttributeType.DATE_LIST:
                             typeString += `item${printPath([...path, key])}.map((date) => new Date(date)),\n`

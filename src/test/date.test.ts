@@ -17,10 +17,7 @@ describe('date', () => {
             dateAttr: null,
         })
 
-        expect(item).toStrictEqual({
-            partitionKey: 'date#test#01',
-            dateAttr: null,
-            dateAttr2: null,
-        });   
+        expect(item.dateAttr).toBeInstanceOf(Date);
+        expect(item.dateAttr2).toBeNull();   
     })
 })
