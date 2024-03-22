@@ -13,6 +13,8 @@ export class ClientGenerator {
         res += `const { Logger } = require("./Logger");\n`;
         res += `${entities.map((entity) => `const { ${entity}EntityClass } = require("./${entity}");`).join('\n')}\n\n`;
 
+        res += `const marshallOptions = { convertEmptyValues: true };\n\n`;
+
         res += `class DynormoClient {\n`;
         res += `client;\n`;
         res += `tables;\n`;
@@ -20,12 +22,12 @@ export class ClientGenerator {
         res += `${entities.map((e) => `${e}CachedEntity;`).join('\n')}\n\n`;
 
         res += `constructor(config) {\n`;
-        res += `this.client = config.client || DynamoDBDocumentClient.from(\n`;
+        res += `this.client = config.client ? DynamoDBDocumentClient.from(config.client, { marshallOptions }) : DynamoDBDocumentClient.from(\n`;
         res += `new DynamoDBClient({\n`;
         res += `region: config.region,\n`;
         res += `endpoint: config.endpoint,\n`;
         res += `credentials: config.credentials,\n`;
-        res += `})\n`;
+        res += `}), { marshallOptions }\n`;
         res += `);\n`;
         res += `this.tables = config.tables || {};\n\n`;
         res += `if (Array.isArray(config.logger)) {\n`;

@@ -8,7 +8,7 @@ describe('parseFilterExpression', () => {
         expect(result).toStrictEqual({
             FilterExpression: '(#a = :a)',
             ExpressionAttributeNames: { '#a': 'a' },
-            ExpressionAttributeValues: { ':a': { S: 'test' } },
+            ExpressionAttributeValues: { ':a': 'test' },
         });
     });
 
@@ -17,7 +17,7 @@ describe('parseFilterExpression', () => {
         expect(result).toStrictEqual({
             FilterExpression: '(#a = :a AND #b = :b)',
             ExpressionAttributeNames: { '#a': 'a', '#b': 'b' },
-            ExpressionAttributeValues: { ':a': { S: 'test' }, ':b': { S: 'test' } },
+            ExpressionAttributeValues: { ':a': 'test', ':b': 'test' },
         });
     });
 
@@ -26,7 +26,7 @@ describe('parseFilterExpression', () => {
         expect(result).toStrictEqual({
             FilterExpression: '(begins_with(#a, :a))',
             ExpressionAttributeNames: { '#a': 'a' },
-            ExpressionAttributeValues: { ':a': { S: 'test' } },
+            ExpressionAttributeValues: { ':a': 'test' },
         });
     });
 
@@ -35,7 +35,7 @@ describe('parseFilterExpression', () => {
         expect(result).toStrictEqual({
             FilterExpression: '(#a BETWEEN :a0 AND :a1)',
             ExpressionAttributeNames: { '#a': 'a' },
-            ExpressionAttributeValues: { ':a0': { S: 'test' }, ':a1': { S: 'test' } },
+            ExpressionAttributeValues: { ':a0': 'test', ':a1': 'test' },
         });
     });
 
@@ -44,7 +44,7 @@ describe('parseFilterExpression', () => {
         expect(result).toStrictEqual({
             FilterExpression: '(#a = :a)',
             ExpressionAttributeNames: { '#a': 'a' },
-            ExpressionAttributeValues: { ':a': { S: 'test' } },
+            ExpressionAttributeValues: { ':a': 'test' },
         });
     });
 
@@ -53,7 +53,7 @@ describe('parseFilterExpression', () => {
         expect(result).toStrictEqual({
             FilterExpression: '(#a >= :a)',
             ExpressionAttributeNames: { '#a': 'a' },
-            ExpressionAttributeValues: { ':a': { N: '5' } },
+            ExpressionAttributeValues: { ':a': 5 },
         });
     });
 });

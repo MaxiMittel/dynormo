@@ -183,8 +183,6 @@ describe('findMany', () => {
             },
         });
 
-        console.log(results);
-
         expect(results.count).toBe(2);
     });
 });

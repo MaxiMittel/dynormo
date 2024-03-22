@@ -1,5 +1,4 @@
 export const shared_js = `const { randomUUID } = require('crypto');
-const { marshall } = require('@aws-sdk/util-dynamodb');
 
 function parseFilterExpression(filter) {
     const generateExpression = (filter, type, prefix) => {
@@ -30,38 +29,38 @@ function parseFilterExpression(filter) {
                         if (itemKey === 'beginsWith') {
                             FilterExpressionItems.push(\`begins_with(#\${prefix}\${key}, :\${prefix}\${key})\`)
                             ExpressionAttributeNames[\`#\${prefix}\${key}\`] = key
-                            ExpressionAttributeValues[\`:\${prefix}\${key}\`] = marshall(item[itemKey], { removeUndefinedValues: true })
+                            ExpressionAttributeValues[\`:\${prefix}\${key}\`] = item[itemKey]
                         } else if (itemKey === 'eq') {
                             FilterExpressionItems.push(\`#\${prefix}\${key} = :\${prefix}\${key}\`)
                             ExpressionAttributeNames[\`#\${prefix}\${key}\`] = key
-                            ExpressionAttributeValues[\`:\${prefix}\${key}\`] = marshall(item[itemKey], { removeUndefinedValues: true })
+                            ExpressionAttributeValues[\`:\${prefix}\${key}\`] = item[itemKey]
                         } else if (itemKey === 'ne') {
                             FilterExpressionItems.push(\`#\${prefix}\${key} <> :\${prefix}\${key}\`)
                             ExpressionAttributeNames[\`#\${prefix}\${key}\`] = key
-                            ExpressionAttributeValues[\`:\${prefix}\${key}\`] = marshall(item[itemKey], { removeUndefinedValues: true })
+                            ExpressionAttributeValues[\`:\${prefix}\${key}\`] = item[itemKey]
                         } else if (itemKey === 'g') {
                             FilterExpressionItems.push(\`#\${prefix}\${key} > :\${prefix}\${key}\`)
                             ExpressionAttributeNames[\`#\${prefix}\${key}\`] = key
-                            ExpressionAttributeValues[\`:\${prefix}\${key}\`] = marshall(item[itemKey], { removeUndefinedValues: true })
+                            ExpressionAttributeValues[\`:\${prefix}\${key}\`] = item[itemKey]
                         } else if (itemKey === 'ge') {
                             FilterExpressionItems.push(\`#\${prefix}\${key} >= :\${prefix}\${key}\`)
                             ExpressionAttributeNames[\`#\${prefix}\${key}\`] = key
-                            ExpressionAttributeValues[\`:\${prefix}\${key}\`] = marshall(item[itemKey], { removeUndefinedValues: true })
+                            ExpressionAttributeValues[\`:\${prefix}\${key}\`] = item[itemKey]
                         } else if (itemKey === 'l') {
                             FilterExpressionItems.push(\`#\${prefix}\${key} < :\${prefix}\${key}\`)
                             ExpressionAttributeNames[\`#\${prefix}\${key}\`] = key
-                            ExpressionAttributeValues[\`:\${prefix}\${key}\`] = marshall(item[itemKey], { removeUndefinedValues: true })
+                            ExpressionAttributeValues[\`:\${prefix}\${key}\`] = item[itemKey]
                         } else if (itemKey === 'le') {
                             FilterExpressionItems.push(\`#\${prefix}\${key} <= :\${prefix}\${key}\`)
                             ExpressionAttributeNames[\`#\${prefix}\${key}\`] = key
-                            ExpressionAttributeValues[\`:\${prefix}\${key}\`] = marshall(item[itemKey], { removeUndefinedValues: true })
+                            ExpressionAttributeValues[\`:\${prefix}\${key}\`] = item[itemKey]
                         } else if (itemKey === 'between') {
                             if (!Array.isArray(item[itemKey])) return
                             FilterExpressionItems.push(\`#\${prefix}\${key} BETWEEN :\${prefix}\${key}0 AND :\${prefix}\${key}1\`)
                             ExpressionAttributeNames[\`#\${prefix}\${key}\`] = key
                             if (item[itemKey] && item[itemKey].length === 2) {
-                                ExpressionAttributeValues[\`:\${prefix}\${key}0\`] = marshall(item[itemKey][0], { removeUndefinedValues: true })
-                                ExpressionAttributeValues[\`:\${prefix}\${key}1\`] = marshall(item[itemKey][1], { removeUndefinedValues: true })
+                                ExpressionAttributeValues[\`:\${prefix}\${key}0\`] = item[itemKey][0]
+                                ExpressionAttributeValues[\`:\${prefix}\${key}1\`] = item[itemKey][1]
                             }
                         } else if (itemKey === 'in') {
                             if (!Array.isArray(item[itemKey])) return
@@ -70,19 +69,19 @@ function parseFilterExpression(filter) {
                             ExpressionAttributeNames[\`#\${keyName}\`] = key
                             FilterExpressionItems.push(\`#\${keyName} IN (\${keyNameList.map((_, i) => \`:\${keyName}\${i}\`).join(', ')})\`)
                             item[itemKey].forEach((v, i) => {
-                                ExpressionAttributeValues[\`:\${keyName}\${i}\`] = marshall(v, { removeUndefinedValues: true })
+                                ExpressionAttributeValues[\`:\${keyName}\${i}\`] = v
                             })
                         } else if (itemKey === 'contains') {
                             FilterExpressionItems.push(\`contains(#\${prefix}\${key}, :\${prefix}\${key})\`)
                             ExpressionAttributeNames[\`#\${prefix}\${key}\`] = key
-                            ExpressionAttributeValues[\`:\${prefix}\${key}\`] = marshall(item[itemKey], { removeUndefinedValues: true })
+                            ExpressionAttributeValues[\`:\${prefix}\${key}\`] = item[itemKey]
                         }
                     })
                 } else {
                     if (!value) return
                     const keyName = \`\${prefix}\${key}\`
                     ExpressionAttributeNames[\`#\${keyName}\`] = key
-                    ExpressionAttributeValues[\`:\${keyName}\`] = marshall(value, { removeUndefinedValues: true })
+                    ExpressionAttributeValues[\`:\${keyName}\`] = value
                     FilterExpressionItems.push(\`#\${keyName} = :\${keyName}\`)
                 }
             }

@@ -15,3 +15,5 @@ output
 .env.prod
 
 *.tgz
+
+notest.ts

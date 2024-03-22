@@ -16,6 +16,7 @@ export const logger_js = `class Logger {
     }
 
     error(message, params, err) {
+        console.log(err);
         if (!this.modes.includes('error')) return;
         let awsErrorMessage = '';
 

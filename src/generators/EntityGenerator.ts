@@ -263,8 +263,7 @@ export class EntityGenerator {
      * @returns {string} The generated code
      */
     public async generate(): Promise<string> {
-        let res = `const { GetItemCommand, PutItemCommand, DeleteItemCommand, ScanCommand, BatchWriteItemCommand, QueryCommand, UpdateItemCommand } = require("@aws-sdk/client-dynamodb");\n`;
-        res += `const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");\n`;
+        let res = `const { GetCommand, ScanCommand, QueryCommand, PutCommand, DeleteCommand,UpdateCommand, BatchWriteCommand } = require("@aws-sdk/lib-dynamodb");\n`;
         res += `const { parseFilterExpression, uuid } = require("./shared");\n\n`;
 
         res += `class ${this.name}EntityClass {\n`;
@@ -284,17 +283,17 @@ export class EntityGenerator {
         res += `    async findOne(${this.printKeyParams()}) {\n`;
         res += `        const params = {\n`;
         res += `            TableName: this.tableName,\n`;
-        res += `            Key: marshall({ ${this.printKeyExpression()} }, { removeUndefinedValues: true }),\n`;
+        res += `            Key: { ${this.printKeyExpression()} },\n`;
         res += `        };\n\n`;
 
         res += `        try {\n`;
         res += `            this.logger.log('[${this.name}][findOne]', params);\n`;
-        res += `            const { Item } = await this.client.send(new GetItemCommand(params));\n`;
+        res += `            const { Item } = await this.client.send(new GetCommand(params));\n`;
         res += `            if (!Item) {\n`;
         res += `                return null;\n`;
         res += `            }\n\n`;
 
-        res += `            return this.map${this.name}(unmarshall(Item));\n`;
+        res += `            return this.map${this.name}(Item);\n`;
         res += `        } catch (err) {\n`;
         res += `            this.logger.error('[${this.name}][findOne]', params, err);\n`;
         res += `            throw new Error("An error occurred while trying to find the item. Additional information above.");\n`;
@@ -322,7 +321,7 @@ export class EntityGenerator {
         res += `                ExpressionAttributeNames: Object.keys(ExpressionAttributeNames ?? {}).length ? ExpressionAttributeNames : undefined,\n`;
         res += `                Limit: query.limit ? query.limit : undefined,\n`;
         res += `                IndexName: query.index ? query.index : undefined,\n`;
-        res += `                ExclusiveStartKey: query.startKey ? marshall(query.startKey) : undefined,\n`;
+        res += `                ExclusiveStartKey: query.startKey ? query.startKey : undefined,\n`;
         res += `            };\n\n`;
 
         res += `            try {\n`;
@@ -334,8 +333,8 @@ export class EntityGenerator {
         res += `                }\n\n`;
 
         res += `                return {\n`;
-        res += `                    items: response.Items.map((item) => this.map${this.name}(unmarshall(item))),\n`;
-        res += `                    lastKey: response.LastEvaluatedKey ? unmarshall(response.LastEvaluatedKey) : null,\n`;
+        res += `                    items: response.Items.map((item) => this.map${this.name}(item)),\n`;
+        res += `                    lastKey: response.LastEvaluatedKey ? response.LastEvaluatedKey : null,\n`;
         res += `                    count: response.Items.length,\n`;
         res += `                };\n`;
         res += `            } catch (err) {\n`;
@@ -360,7 +359,7 @@ export class EntityGenerator {
         res += `                ExpressionAttributeNames: Object.keys(combinedExpressionAttributeNames ?? {}).length ? combinedExpressionAttributeNames : undefined,\n`;
         res += `                Limit: query.limit ? query.limit : undefined,\n`;
         res += `                IndexName: query.index ? query.index : undefined,\n`;
-        res += `                ExclusiveStartKey: query.startKey ? marshall(query.startKey) : undefined,\n`;
+        res += `                ExclusiveStartKey: query.startKey ? query.startKey : undefined,\n`;
         res += `            };\n\n`;
 
         res += `            try {\n`;
@@ -372,8 +371,8 @@ export class EntityGenerator {
         res += `                }\n\n`;
 
         res += `                return {\n`;
-        res += `                    items: response.Items.map((item) => this.map${this.name}(unmarshall(item))),\n`;
-        res += `                    lastKey: response.LastEvaluatedKey ? unmarshall(response.LastEvaluatedKey) : null,\n`;
+        res += `                    items: response.Items.map((item) => this.map${this.name}(item)),\n`;
+        res += `                    lastKey: response.LastEvaluatedKey ? response.LastEvaluatedKey : null,\n`;
         res += `                    count: response.Items.length,\n`;
         res += `                };\n`;
         res += `            } catch (err) {\n`;
@@ -414,7 +413,7 @@ export class EntityGenerator {
         res += `    async delete(${this.printKeyParams()}) {\n`;
         res += `        const params = {\n`;
         res += `            TableName: this.tableName,\n`;
-        res += `            Key: marshall({ ${this.printKeyExpression()} }, { removeUndefinedValues: true }),\n`;
+        res += `            Key: { ${this.printKeyExpression()} },\n`;
         res += `        };\n\n`;
 
         res += `        let item;\n`;
@@ -424,7 +423,7 @@ export class EntityGenerator {
 
         res += `        try {\n`;
         res += `            this.logger.log("[${this.name}][delete]", params);\n`;
-        res += `            await this.client.send(new DeleteItemCommand(params));\n\n`;
+        res += `            await this.client.send(new DeleteCommand(params));\n\n`;
 
         res += `            if (this.subscribersDelete.length) {\n`;
         res += `                this.notifySubscribers("DELETE", item);\n`;
@@ -452,17 +451,17 @@ export class EntityGenerator {
         res += `                        RequestItems: {\n`;
         res += `                            [this.tableName]: chunk.map((item) => ({\n`;
         res += `                                DeleteRequest: {\n`;
-        res += `                                    Key: marshall({\n`;
+        res += `                                    Key: {\n`;
         res += `                                        ${this.partitionKey}: ${this.partitionKeyStaticValue ? this.partitionKeyStaticValue : `item["${this.partitionKey}"]`},\n`;
         res += `                                        ${this.sortKey}: ${this.sortKey ? (this.sortKeyStaticValue ? this.sortKeyStaticValue : `item["${this.sortKey}"]`) : undefined}\n`;
-        res += `                                    }, { removeUndefinedValues: true }),\n`;
+        res += `                                    },\n`;
         res += `                                },\n`;
         res += `                            })),\n`;
         res += `                        },\n`;
         res += `                    };\n\n`;
 
         res += `                    this.logger.log("[${this.name}][deleteMany]", params);\n`;
-        res += `                    await this.client.send(new BatchWriteItemCommand(params));\n`;
+        res += `                    await this.client.send(new BatchWriteCommand(params));\n`;
         res += `                })();\n\n`;
 
         res += `                promises.push(promise);\n`;
@@ -486,12 +485,12 @@ export class EntityGenerator {
 
         res += `        const params = {\n`;
         res += `            TableName: this.tableName,\n`;
-        res += `            Item: marshall(values, { removeUndefinedValues: true, convertEmptyValues: true })\n`;
+        res += `            Item: values,\n`;
         res += `        };\n\n`;
 
         res += `        try {\n`;
         res += `            this.logger.log("[${this.name}][create]", params);\n`;
-        res += `            await this.client.send(new PutItemCommand(params));\n`;
+        res += `            await this.client.send(new PutCommand(params));\n`;
         res += `            const insertedItem = this.map${this.name}(values);\n\n`;
 
         res += `            if (this.subscribersCreate.length) {\n`;
@@ -506,16 +505,12 @@ export class EntityGenerator {
         res += `    };\n\n`;
 
         res += `    async update(${this.printKeyParams()}, item) {\n`;
-        res += `        const marshallValue = (value) => {\n`;
+        res += `        const convertValues = (value) => {\n`;
         res += `            if (value instanceof Date) {\n`;
-        res += `                return { S: value.toISOString() };\n`;
-        res += `            } else if (Array.isArray(value)) {\n`;
-        res += `                return { L: value.map((item) => marshallValue(item)) };\n`;
-        res += `            } else if (typeof value === "object" && !(value instanceof Set)) {\n`;
-        res += `                return { M: Object.keys(value).reduce((acc, key) => ({ ...acc, [key]: marshallValue(value[key]) }), {}) };\n`;
-        res += `            } else {\n`;
-        res += `                return marshall(value, { removeUndefinedValues: true, convertEmptyValues: true });\n`;
-        res += `            }\n`;
+        res += `                return value.toISOString();\n`;
+        res += `            }\n\n`;
+
+        res += `            return value;\n`;
         res += `        };\n\n`;
 
         res += `        const UpdateExpression = Object.keys(item)\n`;
@@ -524,34 +519,35 @@ export class EntityGenerator {
         res += `            .join(", ");\n`;
         res += `        const ExpressionAttributeValues = Object.keys(item)\n`;
         res += `            .filter((key) => item[key] !== undefined && key !== "${this.partitionKey}" && key !== "${this.sortKey}")\n`;
-        res += `            .reduce((acc, key) => ({ ...acc, [\`:\${key}\`]: marshallValue(item[key])}), {});\n`;
+        res += `            .reduce((acc, key) => ({ ...acc, [\`:\${key}\`]: convertValues(item[key])}), {});\n`;
         res += `        const ExpressionAttributeNames = Object.keys(item)\n`;
         res += `            .filter((key) => item[key] !== undefined && key !== "${this.partitionKey}" && key !== "${this.sortKey}")\n`;
         res += `            .reduce((acc, key) => ({ ...acc, [\`#\${key}\`]: key }), {});\n\n`;
 
         res += `        const params = {\n`;
         res += `            TableName: this.tableName,\n`;
-        res += `            Key: marshall({ ${this.printKeyExpression()} }, { removeUndefinedValues: true }),\n`;
-        res += `            UpdateExpression,\n`;
+        res += `            Key: { ${this.printKeyExpression()} },\n`;
+        res += `            UpdateExpression: \`SET \${UpdateExpression}\`,\n`;
         res += `            ExpressionAttributeValues,\n`;
         res += `            ExpressionAttributeNames,\n`;
         res += `            ReturnValues: "ALL_NEW",\n`;
         res += `        };\n\n`;
 
-        res += `        let updatedItem;\n`;
-        res += `        if (this.subscribersUpdate.length) {\n`;
-        res += `            updatedItem = await this.findOne(...arguments);\n`;
-        res += `        }\n\n`;
-
         res += `        try {\n`;
         res += `            this.logger.log("[${this.name}][update]", params);\n`;
-        res += `            const { Attributes } = await this.client.send(new UpdateItemCommand(params));\n\n`;
+        res += `            const { Attributes } = await this.client.send(new UpdateCommand(params));\n\n`;
 
-        res += `            if (this.subscribersUpdate.length) {\n`;
-        res += `                this.notifySubscribers("UPDATE", updatedItem, unmarshall(Attributes));\n`;
+        res += `            if (!Attributes) {\n`;
+        res += `                throw new Error("Failed to update ${this.name}");\n`;
         res += `            }\n\n`;
 
-        res += `            return this.map${this.name}(unmarshall(Attributes));\n`;
+        res += `            const updatedItem = this.map${this.name}(Attributes);\n\n`;
+
+        res += `            if (this.subscribersUpdate.length) {\n`;
+        res += `                this.notifySubscribers("UPDATE", updatedItem);\n`;
+        res += `            }\n\n`;
+
+        res += `            return updatedItem;\n`;
         res += `        } catch (err) {\n`;
         res += `            this.logger.error("[${this.name}][update]", params, err);\n`;
         res += `            throw new Error("An error occurred while trying to update the item. Additional information above.");\n`;
@@ -562,7 +558,24 @@ export class EntityGenerator {
         res += `        return ${this.printMapper()};\n`;
         res += `    }\n\n`;
 
-        res += `    notifySubscribers(type, item, updatedItem) {\n`;
+        res += `    subscribe(type, callback) {\n`;
+        res += `        switch (type) {\n`;
+        res += `            case "CREATE": {\n`;
+        res += `                this.subscribersCreate.push(callback);\n`;
+        res += `                break;\n`;
+        res += `            }\n`;
+        res += `            case "UPDATE": {\n`;
+        res += `                this.subscribersUpdate.push(callback);\n`;
+        res += `                break;\n`;
+        res += `            }\n`;
+        res += `            case "DELETE": {\n`;
+        res += `                this.subscribersDelete.push(callback);\n`;
+        res += `                break;\n`;
+        res += `            }\n`;
+        res += `        }\n`;
+        res += `    }\n\n`;
+
+        res += `    notifySubscribers(type, item) {\n`;
         res += `        switch (type) {\n`;
         res += `            case "CREATE": {\n`;
         res += `                for (const subscriber of this.subscribersCreate) {\n`;
@@ -572,7 +585,7 @@ export class EntityGenerator {
         res += `            }\n`;
         res += `            case "UPDATE": {\n`;
         res += `                for (const subscriber of this.subscribersUpdate) {\n`;
-        res += `                    subscriber(item, updatedItem);\n`;
+        res += `                    subscriber(item);\n`;
         res += `                }\n`;
         res += `                break;\n`;
         res += `            }\n`;

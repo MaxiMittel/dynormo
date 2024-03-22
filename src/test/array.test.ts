@@ -15,6 +15,7 @@ describe('array', () => {
         const item = await client.arraytest.create({
             partitionKey: 'test_id_delete',
             setAttr1: new Set([]),
+            arrayAttr2: [],
         });
 
         expect(item.setAttr1).toEqual(new Set([]));
@@ -46,6 +47,7 @@ describe('array', () => {
 
         const item = await client.arraytest.create({
             partitionKey: 'test_id_delete',
+            setAttr1: new Set([]),
             arrayAttr2: [],
         });
 
@@ -79,6 +81,7 @@ describe('array', () => {
         const item = await client.arraytest.create({
             partitionKey: 'test_id_delete',
             arrayAttr2: [1, 2, 3],
+            setAttr1: new Set([]),
         });
 
         expect(item.arrayAttr2).toEqual([1, 2, 3]);
@@ -101,11 +104,13 @@ describe('array', () => {
         await client.arraytest.create({
             partitionKey: 'test_id_in_1',
             arrayAttr2: [1, 2, 3, 56],
+            setAttr1: new Set([]),
         });
 
         await client.arraytest.create({
             partitionKey: 'test_id_in_2',
             arrayAttr2: [1, 2, 3],
+            setAttr1: new Set([]),
         });
 
         const result = await client.arraytest.findMany({
