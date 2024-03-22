@@ -1,3 +1,5 @@
+import * as prettier from 'prettier';
+
 export class ClientGenerator {
     /**
      * Generates the code for a DynormoClient class based on the given entities and tableMap.
@@ -5,64 +7,60 @@ export class ClientGenerator {
      * @param {Object.<string, string>} tableMap - A mapping of entity names to their corresponding table names.
      * @returns {string} The generated code for the DynormoClient class.
      */
-    public static generate(entities: string[], tableMap: { [key: string]: string }) {
-        return `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
-const { Logger } = require("./Logger");
-${entities.map((entity) => `const { ${entity}EntityClass } = require("./${entity}");`).join('\n')}
+    public static async generate(entities: string[], tableMap: { [key: string]: string }) {
+        let res = `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");\n`;
+        res += `const { DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");\n`;
+        res += `const { Logger } = require("./Logger");\n`;
+        res += `${entities.map((entity) => `const { ${entity}EntityClass } = require("./${entity}");`).join('\n')}\n\n`;
 
+        res += `class DynormoClient {\n`;
+        res += `client;\n`;
+        res += `tables;\n`;
+        res += `logger;\n`;
+        res += `${entities.map((e) => `${e}CachedEntity;`).join('\n')}\n\n`;
 
-class DynormoClient {
-	client;
-    tables;
-    logger;
-${entities.map((e) => `\t${e}CachedEntity;`).join('\n')}
+        res += `constructor(config) {\n`;
+        res += `this.client = config.client || DynamoDBDocumentClient.from(\n`;
+        res += `new DynamoDBClient({\n`;
+        res += `region: config.region,\n`;
+        res += `endpoint: config.endpoint,\n`;
+        res += `credentials: config.credentials,\n`;
+        res += `})\n`;
+        res += `);\n`;
+        res += `this.tables = config.tables || {};\n\n`;
+        res += `if (Array.isArray(config.logger)) {\n`;
+        res += `this.logger = new Logger({ modes: config.logger, depth: config.loggerDepth ?? 3 });\n`;
+        res += `} else {\n`;
+        res += `this.logger = config.logger || new Logger({ modes: ['log', 'error', 'warn'], depth: 3 });\n`;
+        res += `}\n`;
+        res += `}\n\n`;
 
-	constructor(config) {
-		this.client =
-		config.client ||
-		DynamoDBDocumentClient.from(
-			new DynamoDBClient({
-				region: config.region,
-				endpoint: config.endpoint,
-				credentials: config.credentials,
-			})
-		);
-        this.tables = config.tables || {};
+        res += `${entities.map((e) => this.generateEntityGetter(e, tableMap)).join('\n')}\n\n`;
 
-        if (Array.isArray(config.logger)) {
-            this.logger = new Logger({ modes: config.logger, depth: config.loggerDepth ?? 3 });
-        } else {
-            this.logger = config.logger || new Logger({ modes: ['log', 'error', 'warn'], depth: 3 });
-        }
-	}
+        res += `get rawClient() {\n`;
+        res += `return this.client;\n`;
+        res += `}\n\n`;
 
-${entities.map((e) => this.generateEntityGetter(e, tableMap)).join('\n')}
+        res += `$transaction(input) {\n`;
+        res += `const chunks = [];\n`;
+        res += `for (let i = 0; i < input.length; i += 25) {\n`;
+        res += `chunks.push(input.slice(i, i + 25));\n`;
+        res += `}\n\n`;
+        res += `return Promise.all(\n`;
+        res += `chunks.map((chunk) => {\n`;
+        res += `const params = {\n`;
+        res += `TransactItems: chunk,\n`;
+        res += `};\n\n`;
+        res += `return this.client.transactWrite(params);\n`;
+        res += `})\n`;
+        res += `);\n`;
+        res += `}\n`;
+        res += `}\n\n`;
 
-    get rawClient() {
-        return this.client;
-    }
+        res += `module.exports = { DynormoClient };`;
 
-    $transaction(input) {
-        const chunks = [];
-        for (let i = 0; i < input.length; i += 25) {
-            chunks.push(input.slice(i, i + 25));
-        }
-
-        return Promise.all(
-            chunks.map((chunk) => {
-                const params = {
-                    TransactItems: chunk,
-                };
-
-                return this.client.transactWrite(params);
-            })
-        );
-    }
-}
-
-module.exports = { DynormoClient };
-  `
+        const prettified = await prettier.format(res, { parser: 'typescript' });
+        return prettified;
     }
 
     /**
@@ -72,13 +70,15 @@ module.exports = { DynormoClient };
      * @returns {string} The generated entity getter.
      */
     private static generateEntityGetter(entity: string, tableMap: { [key: string]: string }) {
-        return `\tget ${entity.toLowerCase()}() {
-		if (!this.${entity}CachedEntity) {
-			this.${entity}CachedEntity = new ${entity}EntityClass(this.client, this.tables["${entity}"] ?? "${tableMap[entity.toLowerCase()] ?? ""}", this.logger);
-		}
+        let res = `get ${entity.toLowerCase()}() {\n`;
+        res += `if (!this.${entity}CachedEntity) {\n`;
+        res += `this.${entity}CachedEntity = new ${entity}EntityClass(this.client, this.tables["${entity}"] ?? "${tableMap[entity.toLowerCase()] ?? ''}", this.logger);\n`;
+        res += `}\n\n`;
 
-		return this.${entity}CachedEntity;
-	}\n`
+        res += `return this.${entity}CachedEntity;\n`;
+        res += `}\n`;
+
+        return res;
     }
 
     /**
@@ -88,7 +88,7 @@ module.exports = { DynormoClient };
      * @returns {string} The generated entity getter declaration.
      */
     private static generateEntityGetterDeclaration(entity: string) {
-        return `\tget ${entity.toLowerCase()}(): ${entity}EntityClass;`
+        return `get ${entity.toLowerCase()}(): ${entity}EntityClass;`;
     }
 
     /**
@@ -96,37 +96,39 @@ module.exports = { DynormoClient };
      * @param {string[]} entities - An array of entity names.
      * @returns {string} The generated code for the DynormoClient class type declarations.
      */
-    public static generateDeclarations(entities: string[]) {
-        return `import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-${entities.map((entity) => `import { ${entity}EntityClass } from "./${entity}";`).join('\n')}
-import { ILogger, LoggerMode } from "./Logger";
+    public static async generateDeclarations(entities: string[]) {
+        let res = `import { DynamoDBClient } from "@aws-sdk/client-dynamodb";\n`;
+        res += `${entities.map((entity) => `import { ${entity}EntityClass } from "./${entity}";`).join('\n')}\n`;
+        res += `import { ILogger, LoggerMode } from "./Logger";\n\n`;
 
-export type DynormoClientOptions = {
-	endpoint?: string;
-	region?: string;
-	credentials?: {
-		accessKeyId: string;
-		secretAccessKey: string;
-		sessionToken?: string;
-	};
-	client?: DynamoDBClient;
-    tables?: {
-${entities.map((e) => `\t\t${e}?: string;`).join('\n')}
-    };
-    logger?: ILogger | LoggerMode[];
-};
+        res += `export type DynormoClientOptions = {\n`;
+        res += `endpoint?: string;\n`;
+        res += `region?: string;\n`;
+        res += `credentials?: {\n`;
+        res += `accessKeyId: string;\n`;
+        res += `secretAccessKey: string;\n`;
+        res += `sessionToken?: string;\n`;
+        res += `};\n`;
+        res += `client?: DynamoDBClient;\n`;
+        res += `tables?: {\n`;
+        res += `${entities.map((e) => `${e}?: string;\n`).join('')}`;
+        res += `};\n`;
+        res += `logger?: ILogger | LoggerMode[];\n`;
+        res += `};\n\n`;
 
-export declare class DynormoClient {
-	private config: DynormoClientOptions;
+        res += `export declare class DynormoClient {\n`;
+        res += `private config: DynormoClientOptions;\n\n`;
 
-	constructor(config: DynormoClientOptions);
+        res += `constructor(config: DynormoClientOptions);\n\n`;
 
-${entities.map((e) => this.generateEntityGetterDeclaration(e)).join('\n')}
+        res += `${entities.map((e) => this.generateEntityGetterDeclaration(e)).join('\n')}\n\n`;
 
-    get rawClient(): DynamoDBClient;
+        res += `get rawClient(): DynamoDBClient;\n\n`;
 
-    $transaction(input: (() => { params: string, item: any | null})[]): Promise<void>;
-}
-`
+        res += `$transaction(input: (() => { params: string, item: any | null})[]): Promise<void>;\n`;
+        res += `}\n`;
+
+        const prettified = await prettier.format(res, { parser: 'typescript' });
+        return prettified;
     }
 }

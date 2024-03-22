@@ -1,62 +1,62 @@
-import { AttributeType } from '../enums/AttributeType'
-import { PrintMode } from '../enums/PrintMode'
-import { IAttribute } from '../interfaces/IAttribute'
+import { AttributeType } from '../enums/AttributeType';
+import { PrintMode } from '../enums/PrintMode';
+import { IAttribute } from '../interfaces/IAttribute';
 
-export const printType = (attribute: IAttribute, mode: PrintMode, indent: number = 0) => {
+export const printType = (attribute: IAttribute, mode: PrintMode) => {
     switch (attribute.type) {
         case AttributeType.NUMBER:
-            return 'number'
+            return 'number';
         case AttributeType.STRING:
-            return 'string'
+            return 'string';
         case AttributeType.BOOLEAN:
-            return 'boolean'
+            return 'boolean';
         case AttributeType.DATE:
-            return 'Date'
+            return 'Date';
         case AttributeType.LIST:
-            return `any[]`
+            return `any[]`;
         case AttributeType.STRING_LIST:
-            return 'string[]'
+            return 'string[]';
         case AttributeType.NUMBER_LIST:
-            return 'number[]'
+            return 'number[]';
         case AttributeType.BOOLEAN_LIST:
-            return 'boolean[]'
+            return 'boolean[]';
         case AttributeType.DATE_LIST:
-            return 'Date[]'
+            return 'Date[]';
         case AttributeType.MAP_LIST:
-            return `{\n${printObject(attribute.properties, mode, indent + 1)}${'  '.repeat(indent)}}[]`
+            return `{\n${printObject(attribute.properties, mode)}}[]`;
         case AttributeType.STRING_SET:
-            return 'Set<string>'
+            return 'Set<string>';
         case AttributeType.NUMBER_SET:
-            return 'Set<number>'
+            return 'Set<number>';
         case AttributeType.MAP:
-            return `{\n${printObject(attribute.properties, mode, indent + 1)}${'  '.repeat(indent)}}`
+            return `{\n${printObject(attribute.properties, mode)}}`;
     }
-}
+};
 
-export const printObject = (attr: { [key: string]: IAttribute }, mode: PrintMode, indent: number) => {
-    let item = ''
+export const printObject = (attr: { [key: string]: IAttribute }, mode: PrintMode) => {
+    let item = '';
     for (const key of Object.keys(attr)) {
-        const attribute = attr[key]
-        let keyItem = '  '.repeat(indent)
+        const attribute = attr[key];
+        let keyItem = '';
 
         if (attribute.staticValue !== undefined) {
-            continue
+            continue;
         }
 
         switch (mode) {
             case PrintMode.FULL:
-                keyItem += `${key}${attribute.nullable ? '?' : ''}: ${printType(attribute, indent)};\n`
-                break
+                keyItem += `${key}${attribute.nullable ? '?' : ''}: ${printType(attribute, mode)};\n`;
+                break;
             case PrintMode.DEFAULT:
-                keyItem += `${key}${attribute.nullable || attribute.defaultValue || attribute.generator ? '?' : ''}: ${printType(attribute, indent)};\n`
-                break
+                keyItem += `${key}${attribute.nullable || attribute.defaultValue || attribute.generator ? '?' : ''}: ${printType(attribute, mode)};\n`;
+                break;
             case PrintMode.PARTIAL:
-                keyItem += `${key}?: ${printType(attribute, indent)};\n`
-                break
+                keyItem += `${key}?: ${printType(attribute, mode)};\n`;
+                break;
         }
 
-        item += keyItem
+        item += keyItem;
     }
 
-    return item
-}
+    return item;
+};

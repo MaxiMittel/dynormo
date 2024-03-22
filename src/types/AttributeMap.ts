@@ -1,3 +1,3 @@
-import { IAttribute } from "../interfaces/IAttribute";
+import { IAttribute } from '../interfaces/IAttribute';
 
-export type AttributeMap = { [key: string]: IAttribute }
+export type AttributeMap = { [key: string]: IAttribute };

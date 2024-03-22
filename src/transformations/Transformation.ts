@@ -1,18 +1,18 @@
-import { BatchWriteItemCommand, CreateBackupCommand, DynamoDBClient, ScanCommand } from '@aws-sdk/client-dynamodb'
-import { marshall } from '@aws-sdk/util-dynamodb'
-import * as fs from 'fs'
+import { BatchWriteItemCommand, CreateBackupCommand, DynamoDBClient, ScanCommand } from '@aws-sdk/client-dynamodb';
+import { marshall } from '@aws-sdk/util-dynamodb';
+import * as fs from 'fs';
 
 export class Transformation<T> {
-    private table: string
-    private client: DynamoDBClient
-    private transformations: ((item: T) => T)[] = []
-    private filterFunctions: ((item: T) => boolean)[] = []
-    private removeFunctions: ((item: T) => boolean)[] = []
-    private addItems: T[] = []
+    private table: string;
+    private client: DynamoDBClient;
+    private transformations: ((item: T) => T)[] = [];
+    private filterFunctions: ((item: T) => boolean)[] = [];
+    private removeFunctions: ((item: T) => boolean)[] = [];
+    private addItems: T[] = [];
 
     constructor(table: string, client: DynamoDBClient) {
-        this.table = table
-        this.client = client
+        this.table = table;
+        this.client = client;
     }
 
     /**
@@ -24,11 +24,11 @@ export class Transformation<T> {
      */
     public addAttribute(attribute: string, value: (item: T) => any): Transformation<T> {
         this.transformations.push((item: T) => {
-            item[attribute] = value(item)
-            return item
-        })
+            item[attribute] = value(item);
+            return item;
+        });
 
-        return this
+        return this;
     }
 
     /**
@@ -38,11 +38,11 @@ export class Transformation<T> {
      */
     public removeAttribute(attribute: string): Transformation<T> {
         this.transformations.push((item: T) => {
-            delete item[attribute]
-            return item
-        })
+            delete item[attribute];
+            return item;
+        });
 
-        return this
+        return this;
     }
 
     /**
@@ -53,12 +53,12 @@ export class Transformation<T> {
      */
     public renameAttribute(oldName: string, newName: string): Transformation<T> {
         this.transformations.push((item: T) => {
-            item[newName] = item[oldName]
-            delete item[oldName]
-            return item
-        })
+            item[newName] = item[oldName];
+            delete item[oldName];
+            return item;
+        });
 
-        return this
+        return this;
     }
 
     /**
@@ -69,11 +69,11 @@ export class Transformation<T> {
      */
     public mapAttribute(attribute: string, value: (item: T) => any): Transformation<T> {
         this.transformations.push((item: T) => {
-            item[attribute] = value(item)
-            return item
-        })
+            item[attribute] = value(item);
+            return item;
+        });
 
-        return this
+        return this;
     }
 
     /**
@@ -84,11 +84,11 @@ export class Transformation<T> {
      */
     public setAttribute(attribute: string, value: any): Transformation<T> {
         this.transformations.push((item: T) => {
-            item[attribute] = value
-            return item
-        })
+            item[attribute] = value;
+            return item;
+        });
 
-        return this
+        return this;
     }
 
     /**
@@ -97,8 +97,8 @@ export class Transformation<T> {
      * @returns The Transformation object
      */
     public filter(filter: (item: T) => boolean): Transformation<T> {
-        this.filterFunctions.push(filter)
-        return this
+        this.filterFunctions.push(filter);
+        return this;
     }
 
     /**
@@ -108,10 +108,10 @@ export class Transformation<T> {
      */
     public map(map: (item: T) => T): Transformation<T> {
         this.transformations.push((item: T) => {
-            return map(item)
-        })
+            return map(item);
+        });
 
-        return this
+        return this;
     }
 
     /**
@@ -120,8 +120,8 @@ export class Transformation<T> {
      * @returns The Transformation object
      */
     public remove(filter: (item: T) => boolean): Transformation<T> {
-        this.removeFunctions.push(filter)
-        return this
+        this.removeFunctions.push(filter);
+        return this;
     }
 
     /**
@@ -130,7 +130,7 @@ export class Transformation<T> {
      * @returns The Transformation object
      */
     public add(item: T): Transformation<T> {
-        this.addItems.push(item)
+        this.addItems.push(item);
         return this;
     }
 
@@ -143,8 +143,8 @@ export class Transformation<T> {
             new CreateBackupCommand({
                 TableName: this.table,
                 BackupName: name,
-            })
-        )
+            }),
+        );
     }
 
     /**
@@ -153,49 +153,49 @@ export class Transformation<T> {
      */
     public async execute(): Promise<void> {
         // Get all items from the table
-        const items: T[] = []
-        let lastEvaluatedKey: any = undefined
+        const items: T[] = [];
+        let lastEvaluatedKey: any = undefined;
         do {
             const response = await this.client.send(
                 new ScanCommand({
                     TableName: this.table,
                     ExclusiveStartKey: lastEvaluatedKey,
-                })
-            )
-            items.push(...(response.Items as T[]))
-            lastEvaluatedKey = response.LastEvaluatedKey
-        } while (lastEvaluatedKey)
+                }),
+            );
+            items.push(...(response.Items as T[]));
+            lastEvaluatedKey = response.LastEvaluatedKey;
+        } while (lastEvaluatedKey);
 
         // Filter items that should not be transformed
         const filteredItems: T[] = items.filter((item: T) => {
             return this.filterFunctions.every((filter: (item: T) => boolean) => {
-                return filter(item)
-            })
-        })
+                return filter(item);
+            });
+        });
 
         // Transform items
         const transformedItems: T[] = filteredItems.map((item: T) => {
             return this.transformations.reduce((item: T, transformation: (item: T) => T) => {
-                return transformation(item)
-            }, item)
-        })
+                return transformation(item);
+            }, item);
+        });
 
         // Remove items
         const itemsToRemove: T[] = filteredItems.filter((item: T) => {
             return this.removeFunctions.some((filter: (item: T) => boolean) => {
-                return filter(item)
-            })
-        })
+                return filter(item);
+            });
+        });
 
         const chunkArray = (array: T[], chunkSize: number): T[][] => {
-            const results: T[][] = []
+            const results: T[][] = [];
             while (array.length) {
-                results.push(array.splice(0, chunkSize))
+                results.push(array.splice(0, chunkSize));
             }
-            return results
-        }
+            return results;
+        };
 
-        const chunkedItemsToRemove = chunkArray(itemsToRemove, 25)
+        const chunkedItemsToRemove = chunkArray(itemsToRemove, 25);
         chunkedItemsToRemove.map(async (chunk: T[]) => {
             await this.client.send(
                 new BatchWriteItemCommand({
@@ -205,14 +205,14 @@ export class Transformation<T> {
                                 DeleteRequest: {
                                     Key: marshall(item),
                                 },
-                            }
+                            };
                         }),
                     },
-                })
-            )
-        })
+                }),
+            );
+        });
 
-        const chunkedTransformedItems = chunkArray(transformedItems, 25)
+        const chunkedTransformedItems = chunkArray(transformedItems, 25);
         chunkedTransformedItems.map(async (chunk: T[]) => {
             await this.client.send(
                 new BatchWriteItemCommand({
@@ -222,15 +222,15 @@ export class Transformation<T> {
                                 PutRequest: {
                                     Item: marshall(item),
                                 },
-                            }
+                            };
                         }),
                     },
-                })
-            )
-        })
+                }),
+            );
+        });
 
         // Add items
-        const chunkedAddItems = chunkArray(this.addItems, 25)
+        const chunkedAddItems = chunkArray(this.addItems, 25);
         chunkedAddItems.map(async (chunk: T[]) => {
             await this.client.send(
                 new BatchWriteItemCommand({
@@ -240,20 +240,20 @@ export class Transformation<T> {
                                 PutRequest: {
                                     Item: marshall(item),
                                 },
-                            }
+                            };
                         }),
                     },
-                })
-            )
-        })
+                }),
+            );
+        });
 
-        await Promise.all(chunkedItemsToRemove)
-        await Promise.all(chunkedTransformedItems)
-        await Promise.all(chunkedAddItems)
+        await Promise.all(chunkedItemsToRemove);
+        await Promise.all(chunkedTransformedItems);
+        await Promise.all(chunkedAddItems);
 
-        console.log(`Transformed ${transformedItems.length} items`)
-        console.log(`Removed ${itemsToRemove.length} items`)
-        console.log(`Added ${this.addItems.length} items`)
+        console.log(`Transformed ${transformedItems.length} items`);
+        console.log(`Removed ${itemsToRemove.length} items`);
+        console.log(`Added ${this.addItems.length} items`);
     }
 
     /**
@@ -263,39 +263,39 @@ export class Transformation<T> {
      */
     public async preview(filename: string): Promise<void> {
         // Get all items from the table
-        const items: T[] = []
-        let lastEvaluatedKey: any = undefined
+        const items: T[] = [];
+        let lastEvaluatedKey: any = undefined;
         do {
             const response = await this.client.send(
                 new ScanCommand({
                     TableName: this.table,
                     ExclusiveStartKey: lastEvaluatedKey,
-                })
-            )
-            items.push(...(response.Items as T[]))
-            lastEvaluatedKey = response.LastEvaluatedKey
-        } while (lastEvaluatedKey)
+                }),
+            );
+            items.push(...(response.Items as T[]));
+            lastEvaluatedKey = response.LastEvaluatedKey;
+        } while (lastEvaluatedKey);
 
         // Filter items that should not be transformed
         const filteredItems: T[] = items.filter((item: T) => {
             return this.filterFunctions.every((filter: (item: T) => boolean) => {
-                return filter(item)
-            })
-        })
+                return filter(item);
+            });
+        });
 
         // Transform items
         const transformedItems: T[] = filteredItems.map((item: T) => {
             return this.transformations.reduce((item: T, transformation: (item: T) => T) => {
-                return transformation(item)
-            }, item)
-        })
+                return transformation(item);
+            }, item);
+        });
 
         // Remove items
         const itemsToRemove: T[] = filteredItems.filter((item: T) => {
             return this.removeFunctions.some((filter: (item: T) => boolean) => {
-                return filter(item)
-            })
-        })
+                return filter(item);
+            });
+        });
 
         // Write items to file
         await fs.promises.writeFile(
@@ -303,7 +303,7 @@ export class Transformation<T> {
             JSON.stringify({
                 transformedItems,
                 itemsToRemove,
-            })
-        )
+            }),
+        );
     }
 }

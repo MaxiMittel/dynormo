@@ -1,7 +1,7 @@
 // @ts-nocheck
-import { DynormoClient } from '.dynormo'
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
-import { expect, test, describe } from '@jest/globals'
+import { DynormoClient } from '.dynormo';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { expect, test, describe } from '@jest/globals';
 
 describe('nested', () => {
     test('create', async () => {
@@ -10,7 +10,7 @@ describe('nested', () => {
                 region: 'eu-central-1',
             }),
             logger: ['error'],
-        })
+        });
 
         const item = await client.nestedtestmodel.create({
             nestedAttr1: {
@@ -34,12 +34,12 @@ describe('nested', () => {
                     nestedAttr1_2: 4,
                 },
             ],
-        })
+        });
 
         expect(item.nestedAttr1).toEqual({
             nestedAttr1_1: 'test_value_1_create',
             nestedAttr1_2: 1,
-        })
+        });
 
         expect(item.nestedAttr2).toEqual({
             nestedAttr2_1: 'test_value_2_create',
@@ -47,7 +47,7 @@ describe('nested', () => {
                 nestedAttr2_2_1: 'test_value_3_create',
                 nestedAttr2_2_2: 2,
             },
-        })
+        });
 
         expect(item.nestedArrayAttr1).toEqual([
             {
@@ -58,14 +58,14 @@ describe('nested', () => {
                 nestedAttr1_1: 'test_value_5_create',
                 nestedAttr1_2: 4,
             },
-        ])
+        ]);
 
-        const itemExists = await client.nestedtestmodel.findOne(item.partitionKey)
+        const itemExists = await client.nestedtestmodel.findOne(item.partitionKey);
 
         expect(itemExists.nestedAttr1).toEqual({
             nestedAttr1_1: 'test_value_1_create',
             nestedAttr1_2: 1,
-        })
+        });
 
         expect(itemExists.nestedAttr2).toEqual({
             nestedAttr2_1: 'test_value_2_create',
@@ -73,7 +73,7 @@ describe('nested', () => {
                 nestedAttr2_2_1: 'test_value_3_create',
                 nestedAttr2_2_2: 2,
             },
-        })
+        });
 
         expect(itemExists.nestedArrayAttr1).toEqual([
             {
@@ -84,10 +84,10 @@ describe('nested', () => {
                 nestedAttr1_1: 'test_value_5_create',
                 nestedAttr1_2: 4,
             },
-        ])
+        ]);
 
-        await client.nestedtestmodel.delete(item.partitionKey)
-    })
+        await client.nestedtestmodel.delete(item.partitionKey);
+    });
 
     test('update', async () => {
         const client = new DynormoClient({
@@ -95,7 +95,7 @@ describe('nested', () => {
                 region: 'eu-central-1',
             }),
             logger: ['error'],
-        })
+        });
 
         const item = await client.nestedtestmodel.create({
             nestedAttr1: {
@@ -119,12 +119,12 @@ describe('nested', () => {
                     nestedAttr1_2: 4,
                 },
             ],
-        })
+        });
 
         expect(item.nestedAttr1).toEqual({
             nestedAttr1_1: 'test_value_1_create',
             nestedAttr1_2: 1,
-        })
+        });
 
         expect(item.nestedAttr2).toEqual({
             nestedAttr2_1: 'test_value_2_create',
@@ -132,7 +132,7 @@ describe('nested', () => {
                 nestedAttr2_2_1: 'test_value_3_create',
                 nestedAttr2_2_2: 2,
             },
-        })
+        });
 
         expect(item.nestedArrayAttr1).toEqual([
             {
@@ -143,7 +143,7 @@ describe('nested', () => {
                 nestedAttr1_1: 'test_value_5_create',
                 nestedAttr1_2: 4,
             },
-        ])
+        ]);
 
         await client.nestedtestmodel.update(item.partitionKey, {
             nestedAttr1: {
@@ -167,14 +167,14 @@ describe('nested', () => {
                     nestedAttr1_2: 4,
                 },
             ],
-        })
+        });
 
-        const itemExists = await client.nestedtestmodel.findOne(item.partitionKey)
+        const itemExists = await client.nestedtestmodel.findOne(item.partitionKey);
 
         expect(itemExists.nestedAttr1).toEqual({
             nestedAttr1_1: 'test_value_1_update',
             nestedAttr1_2: 1,
-        })
+        });
 
         expect(itemExists.nestedAttr2).toEqual({
             nestedAttr2_1: 'test_value_2_update',
@@ -182,7 +182,7 @@ describe('nested', () => {
                 nestedAttr2_2_1: 'test_value_3_update',
                 nestedAttr2_2_2: 2,
             },
-        })
+        });
 
         expect(itemExists.nestedArrayAttr1).toEqual([
             {
@@ -193,8 +193,8 @@ describe('nested', () => {
                 nestedAttr1_1: 'test_value_5_update',
                 nestedAttr1_2: 4,
             },
-        ])
+        ]);
 
-        await client.nestedtestmodel.delete(item.partitionKey)
-    })
-})
+        await client.nestedtestmodel.delete(item.partitionKey);
+    });
+});

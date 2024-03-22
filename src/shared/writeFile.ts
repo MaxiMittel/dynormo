@@ -1,5 +1,5 @@
-import * as fs from 'fs'
-import * as path from 'path'
+import * as fs from 'fs';
+import * as path from 'path';
 
 /**
  * Writes content to a file at the specified filePath.
@@ -8,10 +8,10 @@ import * as path from 'path'
  * @param {string} content - The content to be written to the file.
  */
 export const writeFile = (filePath: string, content: string) => {
-    const dirname = path.dirname(filePath)
+    const dirname = path.dirname(filePath);
     if (!fs.existsSync(dirname)) {
-        fs.mkdirSync(dirname, { recursive: true })
+        fs.mkdirSync(dirname, { recursive: true });
     }
 
-    fs.writeFileSync(filePath, content)
-}
+    fs.writeFileSync(filePath, content);
+};

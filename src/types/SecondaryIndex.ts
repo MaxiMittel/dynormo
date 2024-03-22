@@ -1,5 +1,5 @@
 export type SecondaryIndex = {
-    name: string
-    partitionKey: string
-    sortKey?: string
-}
+    name: string;
+    partitionKey: string;
+    sortKey?: string;
+};

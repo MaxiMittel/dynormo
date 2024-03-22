@@ -103,7 +103,7 @@ function uuid() {
 }
 
 module.exports = { parseFilterExpression, uuid };
-`
+`;
 
 export const shared_d_ts = `export type FilterExpression<T> = {
     beginsWith?: T;
@@ -127,9 +127,7 @@ export type KeyConditionExpression<T> = {
     between?: [T, T];
 };
 
-export declare function parseFilterExpression<T extends {
-    [key: string]: any;
-}>(filter: T): {
+export declare function parseFilterExpression<T extends { [key: string]: any; }>(filter: T): {
     FilterExpression: string;
     ExpressionAttributeValues: any;
     ExpressionAttributeNames: any;
@@ -142,4 +140,4 @@ export enum ItemEvent {
     UPDATE = 'UPDATE',
     DELETE = 'DELETE'
 }
-`
+`;
