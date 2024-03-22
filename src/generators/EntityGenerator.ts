@@ -586,7 +586,7 @@ export class EntityGenerator {
         res += `    }\n`;
         res += `}\n\n`;
 
-        res += `module.exports = ${this.name}EntityClass;`;
+        res += `module.exports = { ${this.name}EntityClass };`;
 
         const prettified = await prettier.format(res, { parser: 'typescript' });
         return prettified;
