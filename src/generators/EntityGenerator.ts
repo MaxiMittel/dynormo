@@ -323,6 +323,9 @@ export class EntityGenerator {
         res += `                Limit: query.limit ? query.limit : undefined,\n`;
         res += `                IndexName: query.index ? query.index : undefined,\n`;
         res += `                ExclusiveStartKey: query.startKey ? query.startKey : undefined,\n`;
+        res += `                ConsistentRead: query.consistentRead ? query.consistentRead : undefined,\n`;
+        res += `                ScanIndexForward: query.scanIndexForward ? query.scanIndexForward : undefined,\n`;
+        res += `                ProjectionExpression: query.projection ? query.projection.join(", ") : undefined,\n`;
         res += `            };\n\n`;
 
         res += `            try {\n`;
@@ -361,6 +364,9 @@ export class EntityGenerator {
         res += `                Limit: query.limit ? query.limit : undefined,\n`;
         res += `                IndexName: query.index ? query.index : undefined,\n`;
         res += `                ExclusiveStartKey: query.startKey ? query.startKey : undefined,\n`;
+        res += `                ConsistentRead: query.consistentRead ? query.consistentRead : undefined,\n`;
+        res += `                ScanIndexForward: query.scanIndexForward ? query.scanIndexForward : undefined,\n`;
+        res += `                ProjectionExpression: query.projection ? query.projection.join(", ") : undefined,\n`;
         res += `            };\n\n`;
 
         res += `            try {\n`;

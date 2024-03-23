@@ -176,6 +176,8 @@ export class EntityDeclarationGenerator {
         res += `  where?: ${this.name}FilterExpression;\n`;
         res += this.indecies.length ? `  index?: ${this.indecies.map((i) => `'${i}'`).join('|')};\n` : '';
         res += `  key?: ${this.keyConditionTypes.join('|')};\n`;
+        res += `  consistentRead?: boolean;\n`;
+        res += `  scanIndexForward?: boolean;\n`;
         res += `  limit?: number;\n`;
         res += `  startKey?: any;\n`;
         res += `}\n\n`;
@@ -190,6 +192,9 @@ export class EntityDeclarationGenerator {
         res += `  where?: ${this.name}FilterExpression;\n`;
         res += this.indecies.length ? `  index?: ${this.indecies.map((i) => `'${i}'`).join('|')};\n` : '';
         res += `  key?: ${this.keyConditionTypes.join('|')};\n`;
+        res += `  consistentRead?: boolean;\n`;
+        res += `  scanIndexForward?: boolean;\n`;
+        res += `  projection?: string[];\n`;
         res += `  limit?: number;\n`;
         res += `}\n\n`;
 
@@ -197,6 +202,9 @@ export class EntityDeclarationGenerator {
         res += `  where?: ${this.name}FilterExpression;\n`;
         res += this.indecies.length ? `  index?: ${this.indecies.map((i) => `'${i}'`).join('|')};\n` : '';
         res += `  key?: ${this.keyConditionTypes.join('|')};\n`;
+        res += `  consistentRead?: boolean;\n`;
+        res += `  scanIndexForward?: boolean;\n`;
+        res += `  projection?: string[];\n`;
         res += `  limit?: number;\n`;
         res += `}\n\n`;
 
@@ -204,6 +212,7 @@ export class EntityDeclarationGenerator {
         res += `  where?: ${this.name}FilterExpression;\n`;
         res += this.indecies.length ? `  index?: ${this.indecies.map((i) => `'${i}'`).join('|')};\n` : '';
         res += `  key?: ${this.keyConditionTypes.join('|')};\n`;
+        res += `  consistentRead?: boolean;\n`;
         res += `  limit?: number;\n`;
         res += `}\n\n`;
 
