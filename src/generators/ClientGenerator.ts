@@ -18,6 +18,7 @@ export class ClientGenerator {
         res += `class DynormoClient {\n`;
         res += `client;\n`;
         res += `tables;\n`;
+        res += `validators;\n`;
         res += `logger;\n`;
         res += `${entities.map((e) => `${e}CachedEntity;`).join('\n')}\n\n`;
 
@@ -29,7 +30,9 @@ export class ClientGenerator {
         res += `credentials: config.credentials,\n`;
         res += `}), { marshallOptions }\n`;
         res += `);\n`;
-        res += `this.tables = config.tables || {};\n\n`;
+        res += `this.tables = config.tables || {};\n`;
+        res += `this.validators = config.validators || {};\n\n`;
+
         res += `if (Array.isArray(config.logger)) {\n`;
         res += `this.logger = new Logger({ modes: config.logger, depth: config.loggerDepth ?? 3 });\n`;
         res += `} else {\n`;
@@ -44,18 +47,20 @@ export class ClientGenerator {
         res += `}\n\n`;
 
         res += `$transaction(input) {\n`;
-        res += `const chunks = [];\n`;
-        res += `for (let i = 0; i < input.length; i += 25) {\n`;
-        res += `chunks.push(input.slice(i, i + 25));\n`;
-        res += `}\n\n`;
-        res += `return Promise.all(\n`;
-        res += `chunks.map((chunk) => {\n`;
-        res += `const params = {\n`;
-        res += `TransactItems: chunk,\n`;
-        res += `};\n\n`;
-        res += `return this.client.transactWrite(params);\n`;
-        res += `})\n`;
-        res += `);\n`;
+        res += `    const chunks = [];\n`;
+        res += `    for (let i = 0; i < input.length; i += 25) {\n`;
+        res += `        chunks.push(input.slice(i, i + 25));\n`;
+        res += `    }\n\n`;
+
+        res += `    return Promise.all(\n`;
+        res += `        chunks.map((chunk) => {\n`;
+        res += `            const params = {\n`;
+        res += `                TransactItems: chunk,\n`;
+        res += `            };\n\n`;
+
+        res += `        return this.client.transactWrite(params);\n`;
+        res += `        })\n`;
+        res += `    );\n`;
         res += `}\n`;
         res += `}\n\n`;
 
@@ -74,7 +79,7 @@ export class ClientGenerator {
     private static generateEntityGetter(entity: string, tableMap: { [key: string]: string }) {
         let res = `get ${entity.toLowerCase()}() {\n`;
         res += `if (!this.${entity}CachedEntity) {\n`;
-        res += `this.${entity}CachedEntity = new ${entity}EntityClass(this.client, this.tables["${entity}"] ?? "${tableMap[entity.toLowerCase()] ?? ''}", this.logger);\n`;
+        res += `this.${entity}CachedEntity = new ${entity}EntityClass(this.client, this.tables["${entity}"] ?? "${tableMap[entity.toLowerCase()] ?? ''}", this.logger, this.validators["${entity}"]);\n`;
         res += `}\n\n`;
 
         res += `return this.${entity}CachedEntity;\n`;
@@ -100,8 +105,13 @@ export class ClientGenerator {
      */
     public static async generateDeclarations(entities: string[]) {
         let res = `import { DynamoDBClient } from "@aws-sdk/client-dynamodb";\n`;
-        res += `${entities.map((entity) => `import { ${entity}EntityClass } from "./${entity}";`).join('\n')}\n`;
+        res += `${entities.map((entity) => `import { ${entity}EntityClass, Create${entity}Input, Update${entity}Input } from "./${entity}";`).join('\n')}\n`;
         res += `import { ILogger, LoggerMode } from "./Logger";\n\n`;
+
+        res += `export type ValidationConfig<T, U> = {\n`;
+        res += `create: (item: T) => T;\n`;
+        res += `update: (item: U) => U;\n`;
+        res += `};\n\n`;
 
         res += `export type DynormoClientOptions = {\n`;
         res += `endpoint?: string;\n`;
@@ -114,6 +124,9 @@ export class ClientGenerator {
         res += `client?: DynamoDBClient;\n`;
         res += `tables?: {\n`;
         res += `${entities.map((e) => `${e}?: string;\n`).join('')}`;
+        res += `};\n`;
+        res += `validators?: {\n`;
+        res += `${entities.map((e) => `${e}?: ValidationConfig<Create${e}Input, Update${e}Input>;\n`).join('')}`;
         res += `};\n`;
         res += `logger?: ILogger | LoggerMode[];\n`;
         res += `};\n\n`;

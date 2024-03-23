@@ -153,7 +153,9 @@ export class EntityDeclarationGenerator {
      */
     public async generate(): Promise<string> {
         let res = `import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";\n`;
-        res += `import { FilterExpression, KeyConditionExpression, ItemEvent } from "./shared";\n\n`;
+        res += `import { FilterExpression, KeyConditionExpression, ItemEvent } from "./shared";\n`;
+        res += `import { ValidationConfig } from "./DynormoClient";\n`;
+        res += `import { Logger } from "./Logger";\n\n`;
 
         res += `export type ${this.name}Entity = {\n`;
         res += printObject(this.attributes, PrintMode.FULL);
@@ -209,7 +211,7 @@ export class EntityDeclarationGenerator {
         res += `  private client: typeof DynamoDBDocumentClient;\n`;
         res += `  private tableName: string;\n\n`;
 
-        res += `  constructor(client: typeof DynamoDBDocumentClient, tableName: string);\n\n`;
+        res += `  constructor(client: typeof DynamoDBDocumentClient, tableName: string, logger: Logger, validation?: ValidationConfig<Create${this.name}Input, Update${this.name}Input>);\n\n`;
 
         res += `  findOne(${this.printKeyParams()}): Promise<${this.name}Entity | null>;\n`;
         res += `  findMany(query: ${this.name}FindManyInput): Promise<${this.name}FindManyOutput>;\n`;

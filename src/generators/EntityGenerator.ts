@@ -270,11 +270,12 @@ export class EntityGenerator {
         res += `    client;\n`;
         res += `    tableName;\n`;
         res += `    logger;\n`;
+        res += `    validation;\n`;
         res += `    subscribersCreate = [];\n`;
         res += `    subscribersUpdate = [];\n`;
         res += `    subscribersDelete = [];\n\n`;
 
-        res += `    constructor(client, tableName, logger) {\n`;
+        res += `    constructor(client, tableName, logger, validation) {\n`;
         res += `        this.client = client;\n`;
         res += `        this.tableName = tableName;\n`;
         res += `        this.logger = logger;\n`;
@@ -481,7 +482,11 @@ export class EntityGenerator {
         res += `    }\n\n`;
 
         res += `    async create(item) {\n`;
-        res += `        const values = ${this.printCreateType()};\n\n`;
+        res += `        let values = ${this.printCreateType()};\n\n`;
+
+        res += `        if (this.validation && this.validation.create) {\n`;
+        res += `            values = this.validation.create(values);\n`;
+        res += `        }\n\n`;
 
         res += `        const params = {\n`;
         res += `            TableName: this.tableName,\n`;
@@ -512,6 +517,10 @@ export class EntityGenerator {
 
         res += `            return value;\n`;
         res += `        };\n\n`;
+
+        res += `        if (this.validation && this.validation.update) {\n`;
+        res += `            item = this.validation.update(item);\n`;
+        res += `        }\n\n`;
 
         res += `        const UpdateExpression = Object.keys(item)\n`;
         res += `            .filter((key) => item[key] !== undefined && key !== "${this.partitionKey}" && key !== "${this.sortKey}")\n`;
