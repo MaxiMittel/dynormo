@@ -22,6 +22,8 @@ export class EntityDeclarationGenerator {
     sortKey?: string;
     sortKeyType?: string;
     sortKeyStaticValue?: DatabaseType;
+    keyConditionTypes: string[] = [];
+    indecies: string[] = [];
 
     constructor(options: EntityDeclarationGeneratorOptions) {
         this.name = options.name;
@@ -73,7 +75,7 @@ export class EntityDeclarationGenerator {
     private printFilterExpressionType(): string {
         const params = [];
         for (const key in this.attributes) {
-            if (key === this.partitionKey || key === this.sortKey) {
+            if (this.indexes.length === 0 && (key === this.partitionKey || key === this.sortKey)) {
                 continue;
             }
 
@@ -107,34 +109,40 @@ export class EntityDeclarationGenerator {
      * @returns {string} The key condition type as string
      */
     private printKeyConditionType(): string {
-        const params = [];
+        const defaultParams = [];
+
         if (this.partitionKey) {
-            params.push(`${this.partitionKey}: ${this.partitionKeyType};`);
+            defaultParams.push(`${this.partitionKey}: ${this.partitionKeyType};`);
         }
 
         if (this.sortKey) {
-            params.push(`${this.sortKey}?: KeyConditionExpression<${this.sortKeyType}> | ${this.sortKeyType};`);
+            defaultParams.push(`${this.sortKey}?: KeyConditionExpression<${this.sortKeyType}> | ${this.sortKeyType};`);
         }
 
-        /*this.indexes.forEach((index) => {
-            if (index.partitionKey && index.partitionKey !== this.partitionKey) {
-                params.push(`  ${index.partitionKey}?: ${printType(this.attributes[index.partitionKey], PrintMode.DEFAULT, 0 )};`)
-            }
-
-            if (index.sortKey && index.sortKey !== this.sortKey) {
-                params.push(`  ${index.sortKey}?: KeyConditionExpression<${printType(this.attributes[index.sortKey], PrintMode.DEFAULT, 0)}> | ${printType(
-                    this.attributes[index.sortKey],
-                    PrintMode.DEFAULT,
-                    0
-                )};`)
-            }
-        });*/
-
         let res = `export type ${this.name}KeyCondition = {\n`;
-        res += `OR?: ${this.name}KeyCondition[];\n`;
-        res += `AND?: ${this.name}KeyCondition[];\n`;
-        res += `NOT?: ${this.name}KeyCondition[];\n`;
-        res += `${params.join('\n')}\n};\n`;
+        res += `${defaultParams.join('\n')}\n};\n\n`;
+
+        this.keyConditionTypes.push(`${this.name}KeyCondition`);
+
+        this.indexes.forEach((index, it) => {
+            const params = [];
+            if (index.partitionKey) {
+                params.push(`${index.partitionKey}?: ${printType(this.attributes[index.partitionKey], PrintMode.DEFAULT)};`);
+            }
+
+            if (index.sortKey) {
+                params.push(
+                    `${index.sortKey}?: KeyConditionExpression<${printType(this.attributes[index.sortKey], PrintMode.DEFAULT)}> | ${printType(this.attributes[index.sortKey], PrintMode.DEFAULT)};`,
+                );
+            }
+
+            let indexName = `${this.name}KeyConditionIndex${it + 1}`;
+            this.keyConditionTypes.push(indexName);
+            this.indecies.push(index.name);
+
+            res += `export type ${indexName} = {\n`;
+            res += `${params.join('\n')}\n};\n\n`;
+        });
 
         return res;
     }
@@ -164,11 +172,11 @@ export class EntityDeclarationGenerator {
 
         res += `export type ${this.name}FindManyInput = {\n`;
         res += `  where?: ${this.name}FilterExpression;\n`;
-        res += `  key?: ${this.name}KeyCondition;\n`;
-        res += `  index?: string;\n`;
+        res += this.indecies.length ? `  index?: ${this.indecies.map((i) => `'${i}'`).join('|')};\n` : '';
+        res += `  key?: ${this.keyConditionTypes.join('|')};\n`;
         res += `  limit?: number;\n`;
         res += `  startKey?: any;\n`;
-        res += '}\n\n';
+        res += `}\n\n`;
 
         res += `export type ${this.name}FindManyOutput = {\n`;
         res += `  items: ${this.name}Entity[];\n`;
@@ -178,20 +186,24 @@ export class EntityDeclarationGenerator {
 
         res += `export type ${this.name}FindFirstInput = {\n`;
         res += `  where?: ${this.name}FilterExpression;\n`;
-        res += `  key?: ${this.name}KeyCondition;\n`;
+        res += this.indecies.length ? `  index?: ${this.indecies.map((i) => `'${i}'`).join('|')};\n` : '';
+        res += `  key?: ${this.keyConditionTypes.join('|')};\n`;
         res += `  limit?: number;\n`;
-        res += '}\n\n';
+        res += `}\n\n`;
 
         res += `export type ${this.name}FindAllInput = {\n`;
         res += `  where?: ${this.name}FilterExpression;\n`;
-        res += `  key?: ${this.name}KeyCondition;\n`;
+        res += this.indecies.length ? `  index?: ${this.indecies.map((i) => `'${i}'`).join('|')};\n` : '';
+        res += `  key?: ${this.keyConditionTypes.join('|')};\n`;
         res += `  limit?: number;\n`;
-        res += '}\n\n';
+        res += `}\n\n`;
 
         res += `export type ${this.name}DeleteManyInput = {\n`;
         res += `  where?: ${this.name}FilterExpression;\n`;
-        res += `  key?: ${this.name}KeyCondition;\n`;
-        res += '}\n\n';
+        res += this.indecies.length ? `  index?: ${this.indecies.map((i) => `'${i}'`).join('|')};\n` : '';
+        res += `  key?: ${this.keyConditionTypes.join('|')};\n`;
+        res += `  limit?: number;\n`;
+        res += `}\n\n`;
 
         res += `export declare class ${this.name}EntityClass {\n`;
         res += `  private client: typeof DynamoDBDocumentClient;\n`;
