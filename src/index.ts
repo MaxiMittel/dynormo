@@ -79,19 +79,22 @@ program
         writeFile(
             indexFile,
             `Object.defineProperty(exports, "__esModule", { value: true });
-const { DynormoClient } = require("./DynormoClient");
-const { Logger } = require("./Logger");
+const { DynormoClient, ValidationConfig, DynormoClientOptions } = require("./DynormoClient");
+const { Logger, LoggerMode } = require("./Logger");
 
 exports.Logger = Logger;
-exports.DynormoClient = DynormoClient;`,
+exports.LoggerMode = LoggerMode;
+exports.DynormoClient = DynormoClient;
+exports.ValidationConfig = ValidationConfig;
+exports.DynormoClientOptions = DynormoClientOptions;`,
         );
 
         const indexFileDeclerations = path.join(outputDir, 'index.d.ts');
         writeFile(
             indexFileDeclerations,
             `${entityNames.map((name) => `export * from "./${name}";`).join('\n')}
-export { DynormoClient } from "./DynormoClient";
-export { Logger } from "./Logger";`,
+export * from "./DynormoClient";
+export * from "./Logger";`,
         );
 
         const packageJson = path.join(outputDir, 'package.json');
