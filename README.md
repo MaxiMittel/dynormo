@@ -10,7 +10,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/MaxiMittel/dynormo">
-    <img src="images/logo.svg" alt="Logo" width="80" height="80">
+    <img src="images/logo.png" alt="Logo" />
   </a>
 
   <h3 align="center">Dynormo</h3>
@@ -126,13 +126,13 @@ The last thing you need to do is create a `DynormoClient` instance. This is the 
 It is recommended to create a single `DynormoClient` instance and reuse it throughout your application. You can read more about the `DynormoClient` in the [DynormoClient](DynormoClient.md) section.
 
 ```typescript
-import { DynormoClient } from '.dynormo'
+import { DynormoClient } from '.dynormo';
 
 const client = new DynormoClient({
     client: new DynamoDBClient({
         region: 'eu-central-1',
     }),
-})
+});
 ```
 
 ### Usage
@@ -140,17 +140,17 @@ const client = new DynormoClient({
 Now that you have everything set up, you can start using Dynormo to interact with your DynamoDB tables. Let's create a new user in the `dynormo-users` table.
 
 ```typescript
-import { DynormoClient } from '.dynormo'
+import { DynormoClient } from '.dynormo';
 
 const client = new DynormoClient({
     client: new DynamoDBClient({
         region: 'eu-central-1',
     }),
-})
+});
 
 const user = await client.user.create({
     stringAttr1: 'Hello World!',
-})
+});
 ```
 
 <!-- CONTRIBUTING -->
