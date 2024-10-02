@@ -1,18 +1,25 @@
 // @ts-nocheck
 import { DynormoClient } from '.dynormo';
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { expect, test, describe } from '@jest/globals';
+import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
+import { expect, test, describe, beforeEach } from '@jest/globals';
+import { mockClient } from 'aws-sdk-client-mock';
+
+const ddbMock = mockClient(DynamoDBClient);
 
 describe('create', () => {
+    beforeEach(() => {
+        ddbMock.reset();
+    });
+
     test('pK - static sK', async () => {
         const client = new DynormoClient({
-            client: new DynamoDBClient({
-                region: 'eu-central-1',
-            }),
+            client: new DynamoDBClient({}),
             logger: ['error'],
         });
 
         const date = new Date();
+
+        ddbMock.on(PutItemCommand).resolves({});
 
         const item = await client.findone1.create({
             partitionKey: 'test_id',
@@ -32,11 +39,11 @@ describe('create', () => {
 
     test('pK - static sK - generators', async () => {
         const client = new DynormoClient({
-            client: new DynamoDBClient({
-                region: 'eu-central-1',
-            }),
+            client: new DynamoDBClient({}),
             logger: ['error'],
         });
+
+        ddbMock.on(PutItemCommand).resolves({});
 
         const item = await client.findone1.create({
             stringAttr1: 'test_value_1_create',
@@ -52,13 +59,13 @@ describe('create', () => {
 
     test('pK', async () => {
         const client = new DynormoClient({
-            client: new DynamoDBClient({
-                region: 'eu-central-1',
-            }),
+            client: new DynamoDBClient({}),
             logger: ['error'],
         });
 
         const date = new Date();
+
+        ddbMock.on(PutItemCommand).resolves({});
 
         const item = await client.findone2.create({
             partitionKey: 'test_id_create_pk',
@@ -77,13 +84,13 @@ describe('create', () => {
 
     test('pK - sK', async () => {
         const client = new DynormoClient({
-            client: new DynamoDBClient({
-                region: 'eu-central-1',
-            }),
+            client: new DynamoDBClient({}),
             logger: ['error'],
         });
 
         const date = new Date();
+
+        ddbMock.on(PutItemCommand).resolves({});
 
         const item = await client.findone3.create({
             partitionKey: 'test_id_create_pk_sk',

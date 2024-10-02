@@ -1,16 +1,39 @@
 // @ts-nocheck
 import { DynormoClient } from '.dynormo';
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBClient, PutItemCommand, GetItemCommand, UpdateItemCommand, DeleteItemCommand, ScanCommand } from '@aws-sdk/client-dynamodb';
 import { expect, test, describe } from '@jest/globals';
+import { mockClient } from 'aws-sdk-client-mock';
+
+const ddbMock = mockClient(DynamoDBClient);
 
 describe('array', () => {
+    beforeEach(() => {
+        ddbMock.reset();
+    });
+
     test('empty set', async () => {
         const client = new DynormoClient({
-            client: new DynamoDBClient({
-                region: 'eu-central-1',
-            }),
+            client: new DynamoDBClient({}),
             logger: ['error'],
         });
+
+        // Mock DynamoDB responses
+        ddbMock.on(PutItemCommand).resolves({});
+        ddbMock.on(GetItemCommand).resolves({
+            Item: {
+                partitionKey: { S: 'test_id_delete' },
+                setAttr1: { SS: [] },
+                arrayAttr2: { L: [] },
+            },
+        });
+        ddbMock.on(UpdateItemCommand).resolves({
+            Attributes: {
+                partitionKey: { S: 'test_id_delete' },
+                setAttr1: { SS: ['test_value_1_create', 'test_value_2_create'] },
+                arrayAttr2: { L: [] },
+            },
+        });
+        ddbMock.on(DeleteItemCommand).resolves({});
 
         const item = await client.arraytest.create({
             partitionKey: 'test_id_delete',
@@ -39,9 +62,7 @@ describe('array', () => {
 
     test('empty array', async () => {
         const client = new DynormoClient({
-            client: new DynamoDBClient({
-                region: 'eu-central-1',
-            }),
+            client: new DynamoDBClient({}),
             logger: ['error'],
         });
 
@@ -72,9 +93,7 @@ describe('array', () => {
 
     test('create array', async () => {
         const client = new DynormoClient({
-            client: new DynamoDBClient({
-                region: 'eu-central-1',
-            }),
+            client: new DynamoDBClient({}),
             logger: ['error'],
         });
 
@@ -95,11 +114,22 @@ describe('array', () => {
 
     test('contains array', async () => {
         const client = new DynormoClient({
-            client: new DynamoDBClient({
-                region: 'eu-central-1',
-            }),
+            client: new DynamoDBClient({}),
             logger: ['error'],
         });
+
+        // Mock DynamoDB responses
+        ddbMock.on(PutItemCommand).resolves({});
+        ddbMock.on(ScanCommand).resolves({
+            Items: [
+                {
+                    partitionKey: { S: 'test_id_in_1' },
+                    setAttr1: { SS: [] },
+                    arrayAttr2: { L: [{ N: '1' }, { N: '2' }, { N: '3' }, { N: '56' }] },
+                },
+            ],
+        });
+        ddbMock.on(DeleteItemCommand).resolves({});
 
         await client.arraytest.create({
             partitionKey: 'test_id_in_1',

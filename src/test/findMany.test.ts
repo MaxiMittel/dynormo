@@ -1,15 +1,40 @@
 // @ts-nocheck
 import { DynormoClient } from '.dynormo';
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { expect, test, describe } from '@jest/globals';
+import { DynamoDBClient, ScanCommand, QueryCommand, PutItemCommand } from '@aws-sdk/client-dynamodb';
+import { expect, test, describe, beforeEach } from '@jest/globals';
+import { mockClient } from 'aws-sdk-client-mock';
+
+const ddbMock = mockClient(DynamoDBClient);
 
 describe('findMany', () => {
+    beforeEach(() => {
+        ddbMock.reset();
+    });
+
     test('pK - static sK - scan', async () => {
         const client = new DynormoClient({
-            client: new DynamoDBClient({
-                region: 'eu-central-1',
-            }),
+            client: new DynamoDBClient({}),
             logger: ['error'],
+        });
+
+        ddbMock.on(ScanCommand).resolves({
+            Items: [
+                {
+                    partitionKey: { S: 'findMany#test#01' },
+                    sortKey: { S: 'static_key' },
+                    stringAttr1: { S: 'test_value_1' },
+                    stringAttr2: { S: 'test_attr_2' },
+                    dateAttr: { S: '2023-10-10T00:00:00.000Z' },
+                },
+                {
+                    partitionKey: { S: 'findMany#test#02' },
+                    sortKey: { S: 'static_key' },
+                    stringAttr1: { S: 'test_value_1' },
+                    stringAttr2: { S: 'test_attr_2' },
+                    dateAttr: { S: '2023-10-10T00:00:00.000Z' },
+                },
+            ],
+            Count: 2,
         });
 
         const item = await client.findone1.findMany({
@@ -45,10 +70,13 @@ describe('findMany', () => {
 
     test('pK - static sK - scan empty', async () => {
         const client = new DynormoClient({
-            client: new DynamoDBClient({
-                region: 'eu-central-1',
-            }),
+            client: new DynamoDBClient({}),
             logger: ['error'],
+        });
+
+        ddbMock.on(ScanCommand).resolves({
+            Items: [],
+            Count: 0,
         });
 
         const item = await client.findone1.findMany({
@@ -63,10 +91,21 @@ describe('findMany', () => {
 
     test('pK - static sK - query', async () => {
         const client = new DynormoClient({
-            client: new DynamoDBClient({
-                region: 'eu-central-1',
-            }),
+            client: new DynamoDBClient({}),
             logger: ['error'],
+        });
+
+        ddbMock.on(QueryCommand).resolves({
+            Items: [
+                {
+                    partitionKey: { S: 'findMany#test#01' },
+                    sortKey: { S: 'static_key' },
+                    stringAttr1: { S: 'test_value_1' },
+                    stringAttr2: { S: 'test_attr_2' },
+                    dateAttr: { S: '2023-10-10T00:00:00.000Z' },
+                },
+            ],
+            Count: 1,
         });
 
         const item = await client.findone1.findMany({
@@ -97,10 +136,35 @@ describe('findMany', () => {
 
     test('pK - sK begins with - query', async () => {
         const client = new DynormoClient({
-            client: new DynamoDBClient({
-                region: 'eu-central-1',
-            }),
+            client: new DynamoDBClient({}),
             logger: ['error'],
+        });
+
+        ddbMock.on(QueryCommand).resolves({
+            Items: [
+                {
+                    partitionKey: { S: 'findMany#test#10' },
+                    sortKey: { S: 'findMany#test#10#01' },
+                    dateAttr: { S: '2023-10-10T00:00:00.000Z' },
+                    stringAttr1: { S: 'test_value_2' },
+                    stringAttr2: { S: 'test_attr_2' },
+                },
+                {
+                    partitionKey: { S: 'findMany#test#10' },
+                    sortKey: { S: 'findMany#test#10#02' },
+                    dateAttr: { S: '2023-10-10T00:00:00.000Z' },
+                    stringAttr1: { S: 'test_value_2' },
+                    stringAttr2: { S: 'test_attr_2' },
+                },
+                {
+                    partitionKey: { S: 'findMany#test#10' },
+                    sortKey: { S: 'findMany#test#10#03' },
+                    dateAttr: { S: '2023-10-10T00:00:00.000Z' },
+                    stringAttr1: { S: 'test_value_2' },
+                    stringAttr2: { S: 'test_attr_2' },
+                },
+            ],
+            Count: 3,
         });
 
         const item = await client.findone3.findMany({
@@ -145,10 +209,29 @@ describe('findMany', () => {
 
     test('pK - static sK - in', async () => {
         const client = new DynormoClient({
-            client: new DynamoDBClient({
-                region: 'eu-central-1',
-            }),
+            client: new DynamoDBClient({}),
             logger: ['error', 'log'],
+        });
+
+        ddbMock.on(PutItemCommand).resolves({});
+        ddbMock.on(ScanCommand).resolves({
+            Items: [
+                {
+                    partitionKey: { S: 'findOne#in#test#01' },
+                    sortKey: { S: 'static_key' },
+                    stringAttr1: { S: 'test_attr_in_1' },
+                    stringAttr2: { S: 'test_attr_2' },
+                    dateAttr: { S: '2023-10-10T00:00:00.000Z' },
+                },
+                {
+                    partitionKey: { S: 'findOne#in#test#02' },
+                    sortKey: { S: 'static_key' },
+                    stringAttr1: { S: 'test_attr_in_2' },
+                    stringAttr2: { S: 'test_attr_2' },
+                    dateAttr: { S: '2023-10-10T00:00:00.000Z' },
+                },
+            ],
+            Count: 2,
         });
 
         await client.findone1.create({
